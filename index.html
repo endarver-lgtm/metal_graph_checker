@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Котировки драгоценных металлов — НБРБ</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23b45309%22 stroke-width=%222%22><circle cx=%2212%22 cy=%2212%22 r=%229%22/><path d=%22M12 7v10M8 12h8%22/></svg>">
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Chart.js: локальная копия из vendor/ с CDN-резервом -->
+    <script src="vendor/chart.umd.min.js"></script>
+    <script>
+        if (!window.Chart) {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"><\/script>');
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+
+        <!-- Шапка приложения -->
+        <header class="header-card">
+            <div class="brand-wrapper">
+                <div class="brand-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">Драгоценные металлы</h1>
+                    <p class="brand-subtitle">Официальные учетные цены Национального банка Республики Беларусь (BYN / грамм)</p>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="status-badge">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">Подключение к api.nbrb.by...</span>
+                </div>
+                <button type="button" class="btn" id="refreshBtn" title="Обновить данные">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                    </svg>
+                    <span>Обновить</span>
+                </button>
+                <button type="button" class="btn" id="exportCsvBtn" title="Экспорт текущих котировок в CSV файл">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span>Экспорт CSV</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Фильтр выбора металла (Карточки) -->
+        <section class="metal-selector-section">
+            <span class="section-label">Выберите драгоценный металл</span>
+            <div class="metals-grid" id="metalCardsContainer">
+                <!-- Заполняется динамически из js/app.js -->
+            </div>
+        </section>
+
+        <!-- Фильтр срока отображения (Период) -->
+        <section class="controls-card">
+            <div class="period-pills-group" id="periodPillsGroup">
+                <button type="button" class="period-pill" data-period="7D">7 дней</button>
+                <button type="button" class="period-pill" data-period="1M">1 месяц</button>
+                <button type="button" class="period-pill" data-period="3M">3 месяца</button>
+                <button type="button" class="period-pill" data-period="6M">6 месяцев</button>
+                <button type="button" class="period-pill active" data-period="1Y">1 год</button>
+                <button type="button" class="period-pill" data-period="3Y">3 года</button>
+                <button type="button" class="period-pill" data-period="5Y">5 лет</button>
+                <button type="button" class="period-pill" data-period="MAX">Все время</button>
+                <button type="button" class="period-pill" data-period="CUSTOM">Свой диапазон</button>
+            </div>
+
+            <div class="custom-date-container" id="customDateContainer" style="display: none;">
+                <div class="date-input-wrapper">
+                    <span>С</span>
+                    <input type="date" class="date-input" id="dateStartInput">
+                </div>
+                <div class="date-input-wrapper">
+                    <span>По</span>
+                    <input type="date" class="date-input" id="dateEndInput">
+                </div>
+                <button type="button" class="btn btn-primary" id="applyCustomDateBtn" style="padding: 6px 14px; font-size: 12px;">
+                    Применить
+                </button>
+            </div>
+        </section>
+
+        <!-- Ключевые показатели за выбранный период -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-title">Текущая цена (BYN / г)</span>
+                <span class="stat-value" id="statCurrentPrice">—</span>
+                <span class="stat-sub" id="statCurrentDate">загрузка...</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-title">Динамика за период</span>
+                <span class="stat-value" id="statDelta">—</span>
+                <span class="stat-sub" id="statDeltaSub">от начала срока</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-title">Максимум за период</span>
+                <span class="stat-value" id="statMaxPrice">—</span>
+                <span class="stat-sub" id="statMaxDate">—</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-title">Минимум за период</span>
+                <span class="stat-value" id="statMinPrice">—</span>
+                <span class="stat-sub" id="statMinDate">—</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-title">Средняя цена</span>
+                <span class="stat-value" id="statAvgPrice">—</span>
+                <span class="stat-sub">за выбранный срок</span>
+            </div>
+        </section>
+
+        <!-- Основной график котировок -->
+        <section class="chart-container-card">
+            <div class="chart-header">
+                <div class="chart-title-area">
+                    <h2 class="chart-title" id="chartTitle">Динамика курса драгоценного металла</h2>
+                    <p class="chart-subtitle" id="chartSubtitle">Загрузка данных...</p>
+                </div>
+                <div class="chart-toolbar">
+                    <!-- Переключатель режима для "Все металлы" (скрыт для одиночного металла) -->
+                    <div class="toggle-switch-wrapper" id="normalizeToggleWrapper" style="display: none;">
+                        <button type="button" class="toggle-switch-btn active" id="modeBynBtn">Цена (BYN)</button>
+                        <button type="button" class="toggle-switch-btn" id="modePctBtn">% динамика</button>
+                    </div>
+
+                    <button type="button" class="btn" id="togglePointsBtn" title="Показать или скрыть точки значений">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <circle cx="19" cy="12" r="2"></circle>
+                            <circle cx="5" cy="12" r="2"></circle>
+                        </svg>
+                        <span>Точки</span>
+                    </button>
+                    <button type="button" class="btn" id="exportPngBtn" title="Сохранить изображение графика в PNG">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                        <span>PNG</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="chart-canvas-wrapper">
+                <canvas id="metalChart"></canvas>
+                <!-- Оверлей загрузки -->
+                <div class="chart-loading-overlay visible" id="chartLoadingOverlay">
+                    <div class="spinner"></div>
+                    <span class="loading-text" id="loadingMessage">Синхронизация с API Нацбанка РБ...</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Таблица истории котировок по дням -->
+        <section class="table-card">
+            <div class="table-header-row">
+                <div class="table-title">
+                    <span>История котировок</span>
+                    <span class="count-badge" id="tableCountBadge">0 записей</span>
+                </div>
+                <div class="table-controls">
+                    <input type="text" class="search-input" id="tableSearchInput" placeholder="Поиск по дате или цене...">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Металл</th>
+                            <th>Официальная цена</th>
+                            <th>Изменение ко дню</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 24px;">
+                                Загрузка истории котировок...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-pagination-bar">
+                <span id="pageIndicator">Стр. 1 из 1</span>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-icon-only" id="prevPageBtn" title="Предыдущая страница">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <button type="button" class="btn btn-icon-only" id="nextPageBtn" title="Следующая страница">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Подвал -->
+        <footer class="footer-note">
+            Источник официальных котировок: 
+            <a href="https://www.nbrb.by/apihelp/bankingots" target="_blank" rel="noopener noreferrer">Национальный банк Республики Беларусь — API цен на драгоценные металлы</a>.
+            <br>
+            Котировки устанавливаются за 1 грамм драгоценного металла в мерных слитках в белорусских рублях (BYN).
+        </footer>
+
+    </div>
+
+    <!-- Основной сценарий приложения (автономный бандл, совместимый как с http://, так и с прямым открытием file://) -->
+    <script src="js/bundle.js"></script>
+</body>
+</html>

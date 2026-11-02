@@ -1,0 +1,782 @@
+/**
+ * Стили веб-приложения котировок драгметаллов НБРБ
+ * Дизайн-система:
+ *  - Минимализм
+ *  - Светлая тема
+ *  - Современный UI со скругленными углами (Rounded-border radius)
+ *  - СТРОГО БЕЗ ТЕНЕЙ (no shadows)
+ *  - СТРОГО БЕЗ ГРАДИЕНТОВ (no gradients)
+ */
+
+:root {
+    /* Базовые цвета светлой темы */
+    --bg-page: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-subtle: #f1f5f9;
+    --bg-active: #0f172a;
+
+    --border-color: #e2e8f0;
+    --border-hover: #cbd5e1;
+    --border-active: #0f172a;
+
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --text-inverse: #ffffff;
+
+    /* Металлы (чистые плоские цвета) */
+    --gold: #b45309;
+    --gold-bg: #fef3c7;
+    --gold-border: #fcd34d;
+
+    --silver: #475569;
+    --silver-bg: #f1f5f9;
+    --silver-border: #cbd5e1;
+
+    --platinum: #2563eb;
+    --platinum-bg: #eff6ff;
+    --platinum-border: #93c5fd;
+
+    --palladium: #0f766e;
+    --palladium-bg: #ccfbf1;
+    --palladium-border: #5eead4;
+
+    /* Статусы динамики */
+    --success: #16a34a;
+    --success-bg: #dcfce7;
+    --success-border: #86efac;
+
+    --danger: #dc2626;
+    --danger-bg: #fee2e2;
+    --danger-border: #fca5a5;
+
+    /* Скругления (Rounded border-radius) */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-pill: 9999px;
+
+    /* Шрифты */
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Сброс и базовые правила */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    /* Запрет теней на всех элементах */
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+    padding: 24px 16px 48px;
+}
+
+.container {
+    max-width: 1240px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ==========================================================================
+   Шапка (Header)
+   ========================================================================== */
+.header-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.brand-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand-icon {
+    width: 44px;
+    height: 44px;
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    flex-shrink: 0;
+}
+
+.brand-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+.brand-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--success);
+}
+.status-dot.error {
+    background-color: var(--danger);
+}
+.status-dot.loading {
+    background-color: var(--gold);
+}
+
+/* Кнопки */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn:hover {
+    background-color: var(--bg-subtle);
+    border-color: var(--border-hover);
+}
+
+.btn:active {
+    background-color: #e2e8f0;
+}
+
+.btn-primary {
+    background-color: var(--bg-active);
+    color: var(--text-inverse);
+    border-color: var(--bg-active);
+}
+
+.btn-primary:hover {
+    background-color: #1e293b;
+    border-color: #1e293b;
+}
+
+.btn-icon-only {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: var(--radius-pill);
+}
+
+/* ==========================================================================
+   Выбор металла (Metal Selector Cards)
+   ========================================================================== */
+.metal-selector-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.section-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    padding-left: 4px;
+}
+
+.metals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px;
+}
+
+.metal-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+    user-select: none;
+}
+
+.metal-card:hover {
+    border-color: var(--border-hover);
+    background-color: #fafbfc;
+}
+
+.metal-card.active {
+    border: 2px solid var(--border-active);
+    background-color: var(--bg-card);
+}
+
+.metal-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.metal-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid transparent;
+}
+
+.badge-all {
+    background-color: var(--bg-subtle);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+.badge-gold {
+    background-color: var(--gold-bg);
+    color: var(--gold);
+    border-color: var(--gold-border);
+}
+.badge-silver {
+    background-color: var(--silver-bg);
+    color: var(--silver);
+    border-color: var(--silver-border);
+}
+.badge-platinum {
+    background-color: var(--platinum-bg);
+    color: var(--platinum);
+    border-color: var(--platinum-border);
+}
+.badge-palladium {
+    background-color: var(--palladium-bg);
+    color: var(--palladium);
+    border-color: var(--palladium-border);
+}
+
+.metal-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.metal-price-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.metal-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.metal-unit {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.metal-delta {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    border: 1px solid transparent;
+}
+
+.delta-up {
+    color: var(--success);
+    background-color: var(--success-bg);
+    border-color: var(--success-border);
+}
+
+.delta-down {
+    color: var(--danger);
+    background-color: var(--danger-bg);
+    border-color: var(--danger-border);
+}
+
+.delta-neutral {
+    color: var(--text-secondary);
+    background-color: var(--bg-subtle);
+    border-color: var(--border-color);
+}
+
+/* ==========================================================================
+   Срок отображения (Period Filter Pills)
+   ========================================================================== */
+.controls-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.period-pills-group {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-pill);
+    padding: 3px;
+    gap: 2px;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.period-pill {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.period-pill:hover {
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.period-pill.active {
+    background-color: var(--bg-active);
+    color: var(--text-inverse);
+    border-color: var(--bg-active);
+}
+
+.custom-date-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.date-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.date-input {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 6px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    outline: none;
+}
+
+.date-input:focus {
+    border-color: var(--border-active);
+}
+
+/* ==========================================================================
+   Ключевые показатели (Stats Row)
+   ========================================================================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.stat-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+}
+
+.stat-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Основной график (Chart Section)
+   ========================================================================== */
+.chart-container-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.chart-title-area {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.chart-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.chart-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.chart-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.toggle-switch-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-pill);
+    padding: 2px;
+}
+
+.toggle-switch-btn {
+    border: 1px solid transparent;
+    background: transparent;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.toggle-switch-btn.active {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.chart-canvas-wrapper {
+    position: relative;
+    width: 100%;
+    height: 420px;
+}
+
+/* Индикатор загрузки */
+.chart-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    border-radius: var(--radius-lg);
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.chart-loading-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--bg-active);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   Таблица истории котировок (History Table)
+   ========================================================================== */
+.table-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.table-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.table-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.count-badge {
+    font-size: 11px;
+    font-weight: 600;
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    color: var(--text-secondary);
+}
+
+.table-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-input {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-pill);
+    background-color: var(--bg-subtle);
+    color: var(--text-primary);
+    outline: none;
+    width: 190px;
+}
+
+.search-input:focus {
+    border-color: var(--border-active);
+    background-color: var(--bg-card);
+}
+
+.table-responsive {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13px;
+}
+
+.data-table th {
+    background-color: var(--bg-subtle);
+    color: var(--text-secondary);
+    font-weight: 600;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+    background-color: #fafbfc;
+}
+
+.table-pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 4px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   Подвал (Footer)
+   ========================================================================== */
+.footer-note {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 8px 16px;
+    line-height: 1.6;
+}
+
+.footer-note a {
+    color: var(--text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.footer-note a:hover {
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   Адаптивность для мобильных устройств
+   ========================================================================== */
+@media (max-width: 768px) {
+    body {
+        padding: 16px 8px 32px;
+    }
+
+    .header-card {
+        padding: 16px;
+    }
+
+    .metals-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 8px;
+    }
+
+    .metal-card {
+        padding: 10px 12px;
+    }
+
+    .metal-price {
+        font-size: 16px;
+    }
+
+    .controls-card {
+        padding: 12px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .period-pills-group {
+        justify-content: flex-start;
+    }
+
+    .custom-date-container {
+        justify-content: space-between;
+    }
+
+    .chart-container-card {
+        padding: 16px;
+    }
+
+    .chart-canvas-wrapper {
+        height: 320px;
+    }
+
+    .table-card {
+        padding: 16px;
+    }
+}
