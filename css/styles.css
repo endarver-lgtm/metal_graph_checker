@@ -1,14 +1,15 @@
 /**
- * Утонченная, сдержанная дизайн-система для трекера драгметаллов НБРБ
- * Фокус на главном: Котировка актива -> График -> Параметры
+ * Современная, доступная дизайн-система в эстетике Neo-Grotesque
  * 
- * Особенности:
- * - Четкая визуальная иерархия (главное сразу бросается в глаза)
- * - Убран визуальный шум и нагромождение кнопок
- * - Комфортная для глаз светлая гамма (Slate/Zinc) без резкого слепящего монохрома
- * - Элегантная активная вкладка металла (полная заливка, никаких обрубленных полосок)
+ * Ключевые изменения:
+ * - Шрифт: Полноценный качественный гротеск Inter (с четкими глифами и tabular-nums)
+ * - Доступность и эргономика (UI Accessibility / WCAG 2.5.5):
+ *   Кнопки увеличены до комфортных 36-44px для удобного нажатия мышью и тачем
+ * - Четкая иерархия, мягкий приятный контраст, отсутствие перегруженности
  * - СТРОГО БЕЗ ТЕНЕЙ И БЕЗ ГРАДИЕНТОВ
  */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
     /* Фоновые поверхности */
@@ -48,13 +49,13 @@
     --delta-down-bg: #fef2f2;
 
     /* Радиусы */
-    --radius-card: 16px;
+    --radius-card: 14px;
     --radius-control: 8px;
     --radius-pill: 9999px;
 
-    /* Шрифты */
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-mono: ui-monospace, "JetBrains Mono", "Geist Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    /* Современный чистый гротеск */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: 'Inter', ui-monospace, "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 /* Сброс и жесткий запрет теней и градиентов */
@@ -73,7 +74,8 @@ body {
     color: var(--text-primary);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    padding: 24px 16px 48px;
+    padding: 24px 20px 48px;
+    font-feature-settings: "cv05" 1, "cv11" 1, "tnum" 1;
 }
 
 .mono {
@@ -98,18 +100,18 @@ body {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 12px;
-    padding: 4px 4px 8px;
+    padding: 4px 2px 8px;
 }
 
 .brand-group {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .brand-icon {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-control);
@@ -117,59 +119,61 @@ body {
     align-items: center;
     justify-content: center;
     color: var(--text-primary);
+    flex-shrink: 0;
 }
 
 .brand-title {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 600;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
     color: var(--text-primary);
 }
 
 .brand-source {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
 }
 
 .top-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .status-pill {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: 500;
     color: var(--text-secondary);
     background-color: var(--bg-surface);
     border: 1px solid var(--border-default);
-    padding: 5px 10px;
+    padding: 6px 12px;
     border-radius: var(--radius-pill);
+    min-height: 36px;
 }
 
 .status-dot {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background-color: var(--delta-up);
 }
 .status-dot.error { background-color: var(--delta-down); }
 .status-dot.loading { background-color: var(--gold); }
 
-/* Кнопки */
+/* Кнопки стандартные (доступный размер 36px) */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 7px;
     font-family: inherit;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
-    height: 30px;
-    padding: 0 12px;
+    height: 36px;
+    padding: 0 16px;
     border-radius: var(--radius-control);
     border: 1px solid var(--border-default);
     background-color: var(--bg-surface);
@@ -177,6 +181,7 @@ body {
     cursor: pointer;
     transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
     user-select: none;
+    white-space: nowrap;
 }
 
 .btn:hover {
@@ -187,6 +192,13 @@ body {
 
 .btn:active {
     background-color: var(--bg-hover);
+}
+
+.btn:focus-visible,
+.timeframe-btn:focus-visible,
+.metal-tab:focus-visible {
+    outline: 2px solid var(--border-dark);
+    outline-offset: 2px;
 }
 
 .btn-dark {
@@ -208,10 +220,10 @@ body {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-card);
-    padding: 20px 24px 16px;
+    padding: 20px 24px 18px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 18px;
 }
 
 .hero-main-row {
@@ -225,11 +237,11 @@ body {
 .hero-asset-info {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .hero-asset-title {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
     color: var(--text-muted);
     display: flex;
@@ -238,11 +250,10 @@ body {
 }
 
 .hero-assay-pill {
-    font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
-    padding: 2px 6px;
-    border-radius: var(--radius-control);
+    padding: 2px 7px;
+    border-radius: 4px;
     background-color: var(--bg-muted);
     border: 1px solid var(--border-default);
     color: var(--text-secondary);
@@ -256,16 +267,16 @@ body {
 }
 
 .hero-price {
-    font-family: var(--font-mono);
-    font-size: 32px;
+    font-size: 34px;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
     color: var(--text-primary);
     line-height: 1.1;
+    font-variant-numeric: tabular-nums;
 }
 
 .hero-unit {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 400;
     color: var(--text-muted);
     margin-left: 2px;
@@ -275,12 +286,12 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-family: var(--font-mono);
     font-size: 13px;
     font-weight: 600;
-    padding: 3px 8px;
+    padding: 4px 10px;
     border-radius: var(--radius-control);
     border: 1px solid transparent;
+    font-variant-numeric: tabular-nums;
 }
 
 .hero-delta-badge.up {
@@ -302,11 +313,11 @@ body {
 }
 
 /* ==========================================================================
-   Переключатель металлов (Стильные, чистые вкладки без обрубленных полосок)
+   Переключатель металлов (Эргономичные вкладки 44px)
    ========================================================================== */
 .metal-switcher-tabs {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     overflow-x: auto;
     padding-bottom: 2px;
 }
@@ -314,8 +325,9 @@ body {
 .metal-tab {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 14px;
+    gap: 12px;
+    min-height: 44px;
+    padding: 8px 18px;
     border-radius: 10px;
     border: 1px solid var(--border-default);
     background-color: var(--bg-surface);
@@ -331,7 +343,7 @@ body {
     border-color: var(--border-hover);
 }
 
-/* АКТИВНОЕ СОСТОЯНИЕ: Сплошная заливка темным сланцем, белые надписи, никаких палок сверху */
+/* АКТИВНОЕ СОСТОЯНИЕ: Сплошная темная заливка, отличная контрастность, никаких палок сверху */
 .metal-tab.active {
     background-color: var(--bg-dark);
     border-color: var(--bg-dark);
@@ -343,20 +355,19 @@ body {
 }
 
 .metal-tab.active .metal-tab-price {
-    color: #e2e8f0;
+    color: #f1f5f9;
 }
 
 .metal-tab.active .metal-tab-mark {
-    background-color: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.25);
+    background-color: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.28);
     color: #ffffff;
 }
 
 .metal-tab-mark {
-    font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
-    padding: 2px 5px;
+    padding: 2px 6px;
     border-radius: 4px;
     border: 1px solid var(--border-default);
     background-color: var(--bg-muted);
@@ -364,29 +375,29 @@ body {
 }
 
 .metal-tab-name {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--text-primary);
 }
 
 .metal-tab-price {
-    font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
 }
 
 /* ==========================================================================
-   Единый контейнер графика (Главный фокус страницы)
+   Единый контейнер графика
    ========================================================================== */
 .chart-workspace-card {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-card);
-    padding: 16px 20px 20px;
+    padding: 18px 22px 22px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 18px;
 }
 
 /* Встроенная панель инструментов графика */
@@ -395,41 +406,48 @@ body {
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
 }
 
-/* Переключатели периодов */
+/* Переключатели периодов: увеличены для идеальной UI-доступности (высота 36px, комфортный клик) */
 .timeframe-group {
     display: inline-flex;
     align-items: center;
     background-color: var(--bg-muted);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-control);
-    padding: 2px;
-    gap: 2px;
+    padding: 3px;
+    gap: 3px;
     overflow-x: auto;
 }
 
 .timeframe-btn {
-    border: none;
+    border: 1px solid transparent;
     background: transparent;
-    font-family: var(--font-mono);
-    font-size: 12px;
+    font-family: inherit;
+    font-size: 13px;
     font-weight: 500;
-    color: var(--text-muted);
-    padding: 4px 10px;
+    color: var(--text-secondary);
+    height: 36px;
+    padding: 0 14px;
     border-radius: 6px;
     cursor: pointer;
     white-space: nowrap;
-    transition: background-color 0.1s ease, color 0.1s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+    user-select: none;
 }
 
 .timeframe-btn:hover {
     color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.6);
 }
 
 .timeframe-btn.active {
     background-color: var(--bg-surface);
+    border-color: var(--border-default);
     color: var(--text-primary);
     font-weight: 600;
 }
@@ -437,28 +455,30 @@ body {
 .chart-tools-group {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
 .custom-date-panel {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
+    gap: 8px;
+    font-size: 13px;
     color: var(--text-secondary);
     background-color: var(--bg-muted);
-    padding: 4px 8px;
+    padding: 3px 6px;
     border-radius: var(--radius-control);
     border: 1px solid var(--border-default);
+    min-height: 42px;
 }
 
 .date-input-field {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    padding: 3px 6px;
+    font-family: inherit;
+    font-size: 13px;
+    height: 34px;
+    padding: 0 10px;
     border: 1px solid var(--border-default);
-    border-radius: 4px;
+    border-radius: 6px;
     background-color: var(--bg-surface);
     color: var(--text-primary);
     outline: none;
@@ -472,7 +492,7 @@ body {
 .chart-viewport-box {
     position: relative;
     width: 100%;
-    height: 400px;
+    height: 410px;
 }
 
 .chart-overlay-loader {
@@ -483,7 +503,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
     border-radius: var(--radius-control);
     z-index: 10;
     opacity: 0;
@@ -497,9 +517,9 @@ body {
 }
 
 .loader-spinner {
-    width: 22px;
-    height: 22px;
-    border: 2px solid var(--border-default);
+    width: 24px;
+    height: 24px;
+    border: 2.5px solid var(--border-default);
     border-top-color: var(--text-primary);
     border-radius: 50%;
     animation: rotate-spin 0.7s linear infinite;
@@ -510,28 +530,28 @@ body {
 }
 
 .loader-text {
-    font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 500;
     color: var(--text-secondary);
 }
 
-/* Компактная полоса статистики прямо под графиком */
+/* Компактная полоса показателей прямо под графиком */
 .chart-stats-strip {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: 12px;
-    padding-top: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    padding-top: 16px;
     border-top: 1px solid var(--border-subtle);
 }
 
 .stat-cell {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
 }
 
 .stat-cell-label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -539,20 +559,19 @@ body {
 }
 
 .stat-cell-value {
-    font-family: var(--font-mono);
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 600;
     color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
 }
 
 .stat-cell-sub {
-    font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-faint);
 }
 
 /* ==========================================================================
-   Раскрывающаяся панель истории (Компактный аккордеон, не захламляет экран)
+   Раскрывающаяся панель истории (Компактный аккордеон)
    ========================================================================== */
 .history-collapsible-card {
     background-color: var(--bg-surface);
@@ -565,7 +584,7 @@ body {
     width: 100%;
     background: none;
     border: none;
-    padding: 14px 18px;
+    padding: 16px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -582,20 +601,20 @@ body {
 .history-title-block {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 14px;
+    gap: 10px;
+    font-size: 15px;
     font-weight: 600;
 }
 
 .badge-count {
-    font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
-    padding: 2px 6px;
+    padding: 2px 7px;
     border-radius: 4px;
     background-color: var(--bg-muted);
     border: 1px solid var(--border-default);
     color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
 }
 
 .history-chevron {
@@ -609,7 +628,7 @@ body {
 
 .history-content {
     display: none;
-    padding: 0 18px 16px;
+    padding: 0 20px 18px;
     border-top: 1px solid var(--border-subtle);
 }
 
@@ -618,21 +637,22 @@ body {
 }
 
 .history-search-row {
-    padding: 12px 0 10px;
+    padding: 14px 0 12px;
     display: flex;
     justify-content: flex-end;
 }
 
 .search-input-clean {
     font-family: inherit;
-    font-size: 12px;
-    padding: 6px 10px;
+    font-size: 13px;
+    height: 38px;
+    padding: 0 14px;
     border: 1px solid var(--border-default);
     border-radius: var(--radius-control);
     background-color: var(--bg-muted);
     color: var(--text-primary);
     outline: none;
-    width: 200px;
+    width: 220px;
 }
 
 .search-input-clean:focus {
@@ -643,24 +663,25 @@ body {
 .clean-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 14px;
     text-align: left;
 }
 
 .clean-table th {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.03em;
     color: var(--text-muted);
-    padding: 8px 10px;
+    padding: 10px 12px;
     border-bottom: 1px solid var(--border-default);
 }
 
 .clean-table td {
-    padding: 8px 10px;
+    padding: 10px 12px;
     border-bottom: 1px solid var(--border-subtle);
     color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
 }
 
 .clean-table tr:hover {
@@ -671,9 +692,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 10px;
-    font-family: var(--font-mono);
-    font-size: 11px;
+    padding-top: 14px;
+    font-size: 13px;
     color: var(--text-muted);
 }
 
@@ -682,7 +702,7 @@ body {
    ========================================================================== */
 .page-footer {
     text-align: center;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-faint);
     padding: 8px;
     line-height: 1.6;
@@ -703,7 +723,7 @@ body {
    ========================================================================== */
 @media (max-width: 768px) {
     body {
-        padding: 12px 8px 32px;
+        padding: 14px 10px 32px;
     }
 
     .hero-overview-card {
@@ -711,7 +731,7 @@ body {
     }
 
     .hero-price {
-        font-size: 26px;
+        font-size: 28px;
     }
 
     .chart-workspace-card {
@@ -725,5 +745,10 @@ body {
     .chart-stats-strip {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
+    }
+
+    .timeframe-btn {
+        padding: 0 10px;
+        font-size: 12px;
     }
 }

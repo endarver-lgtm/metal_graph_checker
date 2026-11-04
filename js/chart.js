@@ -1,18 +1,13 @@
 /**
  * Модуль визуализации графиков котировок с использованием Chart.js
- * Стилизация по правилам unslop:
- *  - Моноширинные метки шкал и значений (JetBrains Mono / monospace)
- *  - Тонкие нейтральные разделители hairlines (rgba(17, 24, 39, 0.05))
- *  - Чистый плоский тултип без теней с вложенным скруглением (6px)
- *  - СТРОГО БЕЗ ТЕНЕЙ И БЕЗ ГРАДИЕНТОВ
+ * Стилизован под нео-гротеск (Inter)
  */
 
 import { METALS_DEF, formatDateRU } from './api.js';
 
 let chartInstance = null;
 
-const FONT_MONO = 'ui-monospace, "JetBrains Mono", "Geist Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace';
-const FONT_UI = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+const FONT_GROTESK = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
 /**
  * Инициализация или обновление графика
@@ -66,14 +61,14 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
                 data: points,
                 borderColor: meta.Color,
                 backgroundColor: 'transparent',
-                borderWidth: 1.75,
-                pointRadius: showPoints ? 2.5 : 0,
-                pointHoverRadius: 4.5,
+                borderWidth: 2,
+                pointRadius: showPoints ? 3 : 0,
+                pointHoverRadius: 5,
                 pointBackgroundColor: meta.Color,
                 pointBorderColor: '#ffffff',
                 pointBorderWidth: 1.5,
                 spanGaps: true,
-                tension: 0.1,
+                tension: 0.12,
                 metalId: meta.Id
             });
         });
@@ -97,14 +92,14 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
                 target: 'origin',
                 above: meta.BgSubtle
             },
-            borderWidth: 2,
-            pointRadius: showPoints || points.length < 35 ? 2.5 : 0,
-            pointHoverRadius: 5,
+            borderWidth: 2.2,
+            pointRadius: showPoints || points.length < 35 ? 3 : 0,
+            pointHoverRadius: 5.5,
             pointBackgroundColor: meta.Color,
             pointBorderColor: '#ffffff',
             pointBorderWidth: 1.5,
             spanGaps: true,
-            tension: 0.1,
+            tension: 0.12,
             metalId: meta.Id
         });
     }
@@ -148,41 +143,41 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
                     position: 'top',
                     align: 'end',
                     labels: {
-                        boxWidth: 8,
-                        boxHeight: 8,
-                        borderRadius: 2,
+                        boxWidth: 10,
+                        boxHeight: 10,
+                        borderRadius: 3,
                         useBorderRadius: true,
                         font: {
-                            family: FONT_MONO,
-                            size: 11,
+                            family: FONT_GROTESK,
+                            size: 12,
                             weight: '500'
                         },
-                        color: '#4b5563',
+                        color: '#475569',
                         padding: 14
                     }
                 },
                 tooltip: {
                     enabled: true,
                     backgroundColor: '#ffffff',
-                    titleColor: '#111827',
-                    bodyColor: '#374151',
-                    borderColor: '#e5e7eb',
+                    titleColor: '#0f172a',
+                    bodyColor: '#334155',
+                    borderColor: '#e2e8f0',
                     borderWidth: 1,
                     cornerRadius: 6,
-                    padding: 10,
-                    boxPadding: 4,
+                    padding: 11,
+                    boxPadding: 5,
                     usePointStyle: true,
                     caretSize: 5,
                     caretPadding: 6,
                     titleFont: {
-                        family: FONT_MONO,
-                        size: 12,
+                        family: FONT_GROTESK,
+                        size: 13,
                         weight: '600'
                     },
                     bodyFont: {
-                        family: FONT_MONO,
-                        size: 11,
-                        weight: '400'
+                        family: FONT_GROTESK,
+                        size: 12,
+                        weight: '500'
                     },
                     callbacks: {
                         title: (items) => {
@@ -206,46 +201,48 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
                 x: {
                     grid: {
                         display: true,
-                        color: 'rgba(17, 24, 39, 0.04)',
+                        color: 'rgba(15, 23, 42, 0.04)',
                         lineWidth: 1,
                         drawBorder: false
                     },
                     border: {
                         display: true,
-                        color: '#e5e7eb',
+                        color: '#e2e8f0',
                         width: 1
                     },
                     ticks: {
-                        color: '#6b7280',
+                        color: '#64748b',
                         font: {
-                            family: FONT_MONO,
-                            size: 11
+                            family: FONT_GROTESK,
+                            size: 12,
+                            weight: '500'
                         },
                         maxRotation: 0,
                         autoSkip: true,
                         maxTicksLimit: 8,
-                        padding: 6
+                        padding: 8
                     }
                 },
                 y: {
                     grid: {
                         display: true,
-                        color: 'rgba(17, 24, 39, 0.04)',
+                        color: 'rgba(15, 23, 42, 0.04)',
                         lineWidth: 1,
                         drawBorder: false
                     },
                     border: {
                         display: true,
-                        color: '#e5e7eb',
+                        color: '#e2e8f0',
                         width: 1
                     },
                     ticks: {
-                        color: '#6b7280',
+                        color: '#64748b',
                         font: {
-                            family: FONT_MONO,
-                            size: 11
+                            family: FONT_GROTESK,
+                            size: 12,
+                            weight: '500'
                         },
-                        padding: 8,
+                        padding: 10,
                         callback: (value) => {
                             if (normalizePercent) {
                                 return `${value > 0 ? '+' : ''}${value}%`;
@@ -266,8 +263,8 @@ function drawEmptyState(canvas) {
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
-    ctx.fillStyle = '#6b7280';
-    ctx.font = `13px ${FONT_UI}`;
+    ctx.fillStyle = '#64748b';
+    ctx.font = `14px ${FONT_GROTESK}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('Нет данных для отображения за выбранный период', canvas.width / 2, canvas.height / 2);

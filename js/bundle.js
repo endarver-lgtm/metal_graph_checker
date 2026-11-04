@@ -1,6 +1,6 @@
 /**
  * Единый автономный бандл для работы как через http://, так и напрямую через file:///
- * Обновленная версия: убраны нагромождения, улучшена читаемость, плавные вкладки без лишних полосок.
+ * Нео-гротеск (Inter), доступные размеры элементов интерфейса (36-44px)
  */
 (function() {
     'use strict';
@@ -19,8 +19,7 @@
     const API_BASE = 'https://api.nbrb.by';
     const memoryCache = new Map();
 
-    const FONT_MONO = 'ui-monospace, "JetBrains Mono", "Geist Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace';
-    const FONT_UI = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    const FONT_GROTESK = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
     function formatDateISO(date) {
         const d = new Date(date);
@@ -293,14 +292,14 @@
                     data: points,
                     borderColor: meta.Color,
                     backgroundColor: 'transparent',
-                    borderWidth: 1.75,
-                    pointRadius: showPoints ? 2.5 : 0,
-                    pointHoverRadius: 4.5,
+                    borderWidth: 2,
+                    pointRadius: showPoints ? 3 : 0,
+                    pointHoverRadius: 5,
                     pointBackgroundColor: meta.Color,
                     pointBorderColor: '#ffffff',
                     pointBorderWidth: 1.5,
                     spanGaps: true,
-                    tension: 0.1,
+                    tension: 0.12,
                     metalId: meta.Id
                 });
             });
@@ -324,14 +323,14 @@
                     target: 'origin',
                     above: meta.BgSubtle
                 },
-                borderWidth: 2,
-                pointRadius: showPoints || points.length < 35 ? 2.5 : 0,
-                pointHoverRadius: 5,
+                borderWidth: 2.2,
+                pointRadius: showPoints || points.length < 35 ? 3 : 0,
+                pointHoverRadius: 5.5,
                 pointBackgroundColor: meta.Color,
                 pointBorderColor: '#ffffff',
                 pointBorderWidth: 1.5,
                 spanGaps: true,
-                tension: 0.1,
+                tension: 0.12,
                 metalId: meta.Id
             });
         }
@@ -375,16 +374,16 @@
                         position: 'top',
                         align: 'end',
                         labels: {
-                            boxWidth: 8,
-                            boxHeight: 8,
-                            borderRadius: 2,
+                            boxWidth: 10,
+                            boxHeight: 10,
+                            borderRadius: 3,
                             useBorderRadius: true,
                             font: {
-                                family: FONT_MONO,
-                                size: 11,
+                                family: FONT_GROTESK,
+                                size: 12,
                                 weight: '500'
                             },
-                            color: '#4b5563',
+                            color: '#475569',
                             padding: 14
                         }
                     },
@@ -396,20 +395,20 @@
                         borderColor: '#e2e8f0',
                         borderWidth: 1,
                         cornerRadius: 6,
-                        padding: 10,
-                        boxPadding: 4,
+                        padding: 11,
+                        boxPadding: 5,
                         usePointStyle: true,
                         caretSize: 5,
                         caretPadding: 6,
                         titleFont: {
-                            family: FONT_MONO,
-                            size: 12,
+                            family: FONT_GROTESK,
+                            size: 13,
                             weight: '600'
                         },
                         bodyFont: {
-                            family: FONT_MONO,
-                            size: 11,
-                            weight: '400'
+                            family: FONT_GROTESK,
+                            size: 12,
+                            weight: '500'
                         },
                         callbacks: {
                             title: (items) => {
@@ -445,13 +444,14 @@
                         ticks: {
                             color: '#64748b',
                             font: {
-                                family: FONT_MONO,
-                                size: 11
+                                family: FONT_GROTESK,
+                                size: 12,
+                                weight: '500'
                             },
                             maxRotation: 0,
                             autoSkip: true,
                             maxTicksLimit: 8,
-                            padding: 6
+                            padding: 8
                         }
                     },
                     y: {
@@ -469,10 +469,11 @@
                         ticks: {
                             color: '#64748b',
                             font: {
-                                family: FONT_MONO,
-                                size: 11
+                                family: FONT_GROTESK,
+                                size: 12,
+                                weight: '500'
                             },
-                            padding: 8,
+                            padding: 10,
                             callback: (value) => {
                                 if (normalizePercent) {
                                     return `${value > 0 ? '+' : ''}${value}%`;
@@ -494,7 +495,7 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.save();
         ctx.fillStyle = '#64748b';
-        ctx.font = `13px ${FONT_UI}`;
+        ctx.font = `14px ${FONT_GROTESK}`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('Нет данных для отображения за выбранный период', canvas.width / 2, canvas.height / 2);
