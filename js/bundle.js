@@ -1,12 +1,12 @@
 /**
  * Единый автономный бандл для работы как через http://, так и напрямую через file:///
- * Редизайн в соответствии со стандартами Unslop (Damir Sokolovsky)
+ * Обновленная версия: убраны нагромождения, улучшена читаемость, плавные вкладки без лишних полосок.
  */
 (function() {
     'use strict';
 
     /* ==========================================================================
-       1. КОНСТАНТЫ И РЕЕСТР МЕТАЛЛОВ (api)
+       1. РЕЕСТР МЕТАЛЛОВ И API
        ========================================================================== */
 
     const METALS_DEF = [
@@ -243,7 +243,7 @@
     }
 
     /* ==========================================================================
-       2. МОДУЛЬ ГРАФИКА (chart)
+       2. МОДУЛЬ ГРАФИКА
        ========================================================================== */
 
     let chartInstance = null;
@@ -391,9 +391,9 @@
                     tooltip: {
                         enabled: true,
                         backgroundColor: '#ffffff',
-                        titleColor: '#111827',
-                        bodyColor: '#374151',
-                        borderColor: '#e5e7eb',
+                        titleColor: '#0f172a',
+                        bodyColor: '#334155',
+                        borderColor: '#e2e8f0',
                         borderWidth: 1,
                         cornerRadius: 6,
                         padding: 10,
@@ -433,17 +433,17 @@
                     x: {
                         grid: {
                             display: true,
-                            color: 'rgba(17, 24, 39, 0.04)',
+                            color: 'rgba(15, 23, 42, 0.04)',
                             lineWidth: 1,
                             drawBorder: false
                         },
                         border: {
                             display: true,
-                            color: '#e5e7eb',
+                            color: '#e2e8f0',
                             width: 1
                         },
                         ticks: {
-                            color: '#6b7280',
+                            color: '#64748b',
                             font: {
                                 family: FONT_MONO,
                                 size: 11
@@ -457,17 +457,17 @@
                     y: {
                         grid: {
                             display: true,
-                            color: 'rgba(17, 24, 39, 0.04)',
+                            color: 'rgba(15, 23, 42, 0.04)',
                             lineWidth: 1,
                             drawBorder: false
                         },
                         border: {
                             display: true,
-                            color: '#e5e7eb',
+                            color: '#e2e8f0',
                             width: 1
                         },
                         ticks: {
-                            color: '#6b7280',
+                            color: '#64748b',
                             font: {
                                 family: FONT_MONO,
                                 size: 11
@@ -493,7 +493,7 @@
         if (!ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.save();
-        ctx.fillStyle = '#6b7280';
+        ctx.fillStyle = '#64748b';
         ctx.font = `13px ${FONT_UI}`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -513,7 +513,7 @@
     }
 
     /* ==========================================================================
-       3. ПРИЛОЖЕНИЕ (app)
+       3. ГЛАВНОЕ ПРИЛОЖЕНИЕ (app)
        ========================================================================== */
 
     const state = {
@@ -528,7 +528,7 @@
         showPoints: false,
         tableSearch: '',
         tablePage: 1,
-        tablePageSize: 12,
+        tablePageSize: 10,
         isLoading: false
     };
 
@@ -540,26 +540,19 @@
         dom.refreshBtn = document.getElementById('refreshBtn');
         dom.exportCsvBtn = document.getElementById('exportCsvBtn');
 
+        dom.heroMetalTitle = document.getElementById('heroMetalTitle');
+        dom.heroAssayPill = document.getElementById('heroAssayPill');
+        dom.heroPrice = document.getElementById('heroPrice');
+        dom.heroDeltaBadge = document.getElementById('heroDeltaBadge');
+
         dom.metalCardsContainer = document.getElementById('metalCardsContainer');
 
-        dom.periodPills = document.querySelectorAll('.segment-btn[data-period]');
+        dom.periodPills = document.querySelectorAll('.timeframe-btn[data-period]');
         dom.customDateContainer = document.getElementById('customDateContainer');
         dom.dateStartInput = document.getElementById('dateStartInput');
         dom.dateEndInput = document.getElementById('dateEndInput');
         dom.applyCustomDateBtn = document.getElementById('applyCustomDateBtn');
 
-        dom.statCurrentPrice = document.getElementById('statCurrentPrice');
-        dom.statCurrentDate = document.getElementById('statCurrentDate');
-        dom.statDelta = document.getElementById('statDelta');
-        dom.statDeltaSub = document.getElementById('statDeltaSub');
-        dom.statMaxPrice = document.getElementById('statMaxPrice');
-        dom.statMaxDate = document.getElementById('statMaxDate');
-        dom.statMinPrice = document.getElementById('statMinPrice');
-        dom.statMinDate = document.getElementById('statMinDate');
-        dom.statAvgPrice = document.getElementById('statAvgPrice');
-
-        dom.chartTitle = document.getElementById('chartTitle');
-        dom.chartSubtitle = document.getElementById('chartSubtitle');
         dom.chartCanvas = document.getElementById('metalChart');
         dom.chartLoadingOverlay = document.getElementById('chartLoadingOverlay');
         dom.loadingMessage = document.getElementById('loadingMessage');
@@ -569,6 +562,16 @@
         dom.modePctBtn = document.getElementById('modePctBtn');
         dom.exportPngBtn = document.getElementById('exportPngBtn');
 
+        dom.statPeriodLabel = document.getElementById('statPeriodLabel');
+        dom.statPointsCount = document.getElementById('statPointsCount');
+        dom.statMaxPrice = document.getElementById('statMaxPrice');
+        dom.statMaxDate = document.getElementById('statMaxDate');
+        dom.statMinPrice = document.getElementById('statMinPrice');
+        dom.statMinDate = document.getElementById('statMinDate');
+        dom.statAvgPrice = document.getElementById('statAvgPrice');
+
+        dom.historyCard = document.getElementById('historyCard');
+        dom.historyToggleBtn = document.getElementById('historyToggleBtn');
         dom.tableBody = document.getElementById('tableBody');
         dom.tableCountBadge = document.getElementById('tableCountBadge');
         dom.tableSearchInput = document.getElementById('tableSearchInput');
@@ -594,12 +597,12 @@
                 latest.forEach(item => state.latestPrices.set(item.MetalId, item));
             }
 
-            renderMetalCards();
+            renderMetalTabs();
             setOnlineStatus(true, 'api.nbrb.by: онлайн');
         } catch (e) {
             console.error('Ошибка первичной загрузки:', e);
             setOnlineStatus(false, 'Автономный режим');
-            renderMetalCards();
+            renderMetalTabs();
         }
 
         await loadChartData();
@@ -612,7 +615,7 @@
         }
     }
 
-    function setLoadingStatus(message = 'Загрузка архива котировок...') {
+    function setLoadingStatus(message = 'Загрузка данных НБРБ...') {
         if (dom.loadingMessage) dom.loadingMessage.textContent = message;
         if (dom.chartLoadingOverlay) dom.chartLoadingOverlay.classList.add('visible');
         state.isLoading = true;
@@ -623,55 +626,35 @@
         state.isLoading = false;
     }
 
-    function renderMetalCards() {
+    function renderMetalTabs() {
         if (!dom.metalCardsContainer) return;
         dom.metalCardsContainer.innerHTML = '';
 
-        // Карточка "Все металлы"
-        const allCard = document.createElement('div');
-        allCard.className = `metal-card ${state.selectedMetalId === 'all' ? 'active' : ''}`;
-        allCard.dataset.metalId = 'all';
-        allCard.innerHTML = `
-            <div class="metal-card-header">
-                <span class="metal-mark-badge">ALL</span>
-                <span class="metal-name">Все металлы</span>
-            </div>
-            <div class="metal-price-row">
-                <span class="metal-price" style="font-size: 15px; font-weight: 500;">Сводный обзор</span>
-                <span class="metal-unit">Au, Ag, Pt, Pd</span>
-            </div>
-            <div class="metal-delta-tag delta-neutral">Мульти-график</div>
+        const allTab = document.createElement('div');
+        allTab.className = `metal-tab ${state.selectedMetalId === 'all' ? 'active' : ''}`;
+        allTab.dataset.metalId = 'all';
+        allTab.innerHTML = `
+            <span class="metal-tab-mark">ALL</span>
+            <span class="metal-tab-name">Все 4 металла</span>
         `;
-        allCard.addEventListener('click', () => selectMetal('all'));
-        dom.metalCardsContainer.appendChild(allCard);
+        allTab.addEventListener('click', () => selectMetal('all'));
+        dom.metalCardsContainer.appendChild(allTab);
 
-        // Карточки отдельных металлов
         state.metals.forEach(metal => {
             const latest = state.latestPrices.get(metal.Id);
             const priceText = latest ? `${latest.Value.toFixed(2)} BYN` : '—';
-            const card = document.createElement('div');
-            card.className = `metal-card ${String(state.selectedMetalId) === String(metal.Id) ? 'active' : ''}`;
-            card.dataset.metalId = metal.Id;
+            const tab = document.createElement('div');
+            tab.className = `metal-tab ${String(state.selectedMetalId) === String(metal.Id) ? 'active' : ''}`;
+            tab.dataset.metalId = metal.Id;
 
-            let badgeClass = 'badge-gold';
-            if (metal.Id === 1) badgeClass = 'badge-silver';
-            if (metal.Id === 2) badgeClass = 'badge-platinum';
-            if (metal.Id === 3) badgeClass = 'badge-palladium';
-
-            card.innerHTML = `
-                <div class="metal-card-header">
-                    <span class="metal-mark-badge ${badgeClass}">${metal.Assay || metal.Symbol}</span>
-                    <span class="metal-name">${metal.Name}</span>
-                </div>
-                <div class="metal-price-row">
-                    <span class="metal-price">${priceText}</span>
-                    <span class="metal-unit">BYN / г</span>
-                </div>
-                <div class="metal-delta-tag delta-neutral" id="metalCardDelta_${metal.Id}">За 1 г слитка</div>
+            tab.innerHTML = `
+                <span class="metal-tab-mark">${metal.Symbol}</span>
+                <span class="metal-tab-name">${metal.Name}</span>
+                <span class="metal-tab-price">${priceText}</span>
             `;
 
-            card.addEventListener('click', () => selectMetal(String(metal.Id)));
-            dom.metalCardsContainer.appendChild(card);
+            tab.addEventListener('click', () => selectMetal(String(metal.Id)));
+            dom.metalCardsContainer.appendChild(tab);
         });
     }
 
@@ -679,12 +662,12 @@
         if (state.selectedMetalId === metalId && !state.isLoading) return;
         state.selectedMetalId = metalId;
 
-        const cards = dom.metalCardsContainer.querySelectorAll('.metal-card');
-        cards.forEach(c => {
-            if (c.dataset.metalId === String(metalId)) {
-                c.classList.add('active');
+        const tabs = dom.metalCardsContainer.querySelectorAll('.metal-tab');
+        tabs.forEach(t => {
+            if (t.dataset.metalId === String(metalId)) {
+                t.classList.add('active');
             } else {
-                c.classList.remove('active');
+                t.classList.remove('active');
             }
         });
 
@@ -736,7 +719,7 @@
     }
 
     async function loadChartData() {
-        setLoadingStatus('Загрузка архива НБРБ...');
+        setLoadingStatus('Загрузка котировок НБРБ...');
 
         try {
             const onProgress = (loaded, total) => {
@@ -755,97 +738,80 @@
             state.currentPrices = rawPrices;
             state.tablePage = 1;
 
-            updateTitlesAndStats();
+            updateHeroAndStats();
             updateChart();
             renderTable();
             setOnlineStatus(true, 'api.nbrb.by: актуально');
         } catch (err) {
-            console.error('Ошибка загрузки данных котировок:', err);
+            console.error('Ошибка загрузки котировок:', err);
             setOnlineStatus(false, 'Сбой загрузки данных');
         } finally {
             clearLoadingStatus();
         }
     }
 
-    function updateTitlesAndStats() {
+    function updateHeroAndStats() {
         const isAll = state.selectedMetalId === 'all';
         const metal = METALS_DEF.find(m => String(m.Id) === String(state.selectedMetalId));
-        const metalTitle = isAll
-            ? 'Сравнительная динамика котировок (Au, Ag, Pt, Pd)'
-            : (metal ? `${metal.Name} (${metal.Assay || metal.Symbol}) — динамика учетной цены` : 'Динамика котировок');
-
-        if (dom.chartTitle) {
-            dom.chartTitle.textContent = metalTitle;
-        }
-        if (dom.chartSubtitle) {
-            dom.chartSubtitle.textContent = `${formatDateRU(state.startDate)} — ${formatDateRU(state.endDate)} • Официальные котировки НБРБ`;
-        }
 
         if (isAll) {
+            if (dom.heroMetalTitle) dom.heroMetalTitle.textContent = 'Сводный обзор металлов';
+            if (dom.heroAssayPill) dom.heroAssayPill.textContent = 'Au • Ag • Pt • Pd';
+
             const goldPrices = state.currentPrices.filter(p => p.MetalId === 0);
             const stats = calculateStats(goldPrices);
-            renderStatsValues(stats, 'Золото');
-        } else {
-            const stats = calculateStats(state.currentPrices);
-            renderStatsValues(stats, metal ? metal.Name : '');
 
-            if (stats && metal) {
-                const cardDelta = document.getElementById(`metalCardDelta_${metal.Id}`);
-                if (cardDelta) {
-                    const sign = stats.changeAbs > 0 ? '+' : '';
-                    const cssClass = stats.changeAbs > 0 ? 'delta-up' : (stats.changeAbs < 0 ? 'delta-down' : 'delta-neutral');
-                    cardDelta.className = `metal-delta-tag ${cssClass}`;
-                    cardDelta.textContent = `${sign}${stats.changePercent.toFixed(1)}% (${sign}${stats.changeAbs.toFixed(2)} BYN)`;
+            if (stats && dom.heroPrice) {
+                dom.heroPrice.textContent = `${stats.currentPrice.toFixed(2)}`;
+                const sign = stats.changeAbs > 0 ? '+' : '';
+                const cssClass = stats.changeAbs > 0 ? 'up' : (stats.changeAbs < 0 ? 'down' : 'neutral');
+                if (dom.heroDeltaBadge) {
+                    dom.heroDeltaBadge.className = `hero-delta-badge ${cssClass}`;
+                    dom.heroDeltaBadge.textContent = `${sign}${stats.changePercent.toFixed(2)}% (${sign}${stats.changeAbs.toFixed(2)} BYN)`;
                 }
             }
+            renderStatsStrip(stats);
+        } else {
+            const stats = calculateStats(state.currentPrices);
+
+            if (dom.heroMetalTitle && metal) dom.heroMetalTitle.textContent = metal.Name;
+            if (dom.heroAssayPill && metal) dom.heroAssayPill.textContent = metal.Assay || metal.Symbol;
+
+            if (stats && dom.heroPrice) {
+                dom.heroPrice.textContent = `${stats.currentPrice.toFixed(2)}`;
+                const sign = stats.changeAbs > 0 ? '+' : '';
+                const cssClass = stats.changeAbs > 0 ? 'up' : (stats.changeAbs < 0 ? 'down' : 'neutral');
+                if (dom.heroDeltaBadge) {
+                    dom.heroDeltaBadge.className = `hero-delta-badge ${cssClass}`;
+                    dom.heroDeltaBadge.textContent = `${sign}${stats.changePercent.toFixed(2)}% (${sign}${stats.changeAbs.toFixed(2)} BYN)`;
+                }
+            }
+            renderStatsStrip(stats);
         }
     }
 
-    function renderStatsValues(stats, contextLabel) {
+    function renderStatsStrip(stats) {
+        if (dom.statPeriodLabel) {
+            dom.statPeriodLabel.textContent = `${formatDateRU(state.startDate)} — ${formatDateRU(state.endDate)}`;
+        }
+        if (dom.statPointsCount) {
+            dom.statPointsCount.textContent = stats ? `${stats.totalPoints} торговых дней` : '—';
+        }
+
         if (!stats) {
-            if (dom.statCurrentPrice) dom.statCurrentPrice.textContent = '—';
-            if (dom.statCurrentDate) dom.statCurrentDate.textContent = 'нет данных';
-            if (dom.statDelta) dom.statDelta.textContent = '—';
-            if (dom.statMaxPrice) dom.statMaxPrice.textContent = '—';
             if (dom.statMinPrice) dom.statMinPrice.textContent = '—';
+            if (dom.statMaxPrice) dom.statMaxPrice.textContent = '—';
             if (dom.statAvgPrice) dom.statAvgPrice.textContent = '—';
             return;
         }
 
-        if (dom.statCurrentPrice) {
-            dom.statCurrentPrice.textContent = `${stats.currentPrice.toFixed(2)} BYN`;
-        }
-        if (dom.statCurrentDate) {
-            dom.statCurrentDate.textContent = `на ${formatDateRU(stats.lastDate)}`;
-        }
+        if (dom.statMinPrice) dom.statMinPrice.textContent = `${stats.minPrice.toFixed(2)} BYN`;
+        if (dom.statMinDate) dom.statMinDate.textContent = `от ${formatDateRU(stats.minDate)}`;
 
-        if (dom.statDelta) {
-            const sign = stats.changeAbs > 0 ? '+' : '';
-            dom.statDelta.textContent = `${sign}${stats.changeAbs.toFixed(2)} BYN`;
-            dom.statDelta.style.color = stats.changeAbs > 0 ? 'var(--delta-pos)' : (stats.changeAbs < 0 ? 'var(--delta-neg)' : 'var(--text-primary)');
-        }
-        if (dom.statDeltaSub) {
-            const sign = stats.changePercent > 0 ? '+' : '';
-            dom.statDeltaSub.textContent = `${sign}${stats.changePercent.toFixed(2)}% к началу периода`;
-        }
+        if (dom.statMaxPrice) dom.statMaxPrice.textContent = `${stats.maxPrice.toFixed(2)} BYN`;
+        if (dom.statMaxDate) dom.statMaxDate.textContent = `пик ${formatDateRU(stats.maxDate)}`;
 
-        if (dom.statMaxPrice) {
-            dom.statMaxPrice.textContent = `${stats.maxPrice.toFixed(2)} BYN`;
-        }
-        if (dom.statMaxDate) {
-            dom.statMaxDate.textContent = `пик ${formatDateRU(stats.maxDate)}`;
-        }
-
-        if (dom.statMinPrice) {
-            dom.statMinPrice.textContent = `${stats.minPrice.toFixed(2)} BYN`;
-        }
-        if (dom.statMinDate) {
-            dom.statMinDate.textContent = `минимум ${formatDateRU(stats.minDate)}`;
-        }
-
-        if (dom.statAvgPrice) {
-            dom.statAvgPrice.textContent = `${stats.avgPrice.toFixed(2)} BYN`;
-        }
+        if (dom.statAvgPrice) dom.statAvgPrice.textContent = `${stats.avgPrice.toFixed(2)} BYN`;
     }
 
     function updateChart() {
@@ -883,32 +849,27 @@
         const pageItems = filtered.slice(startIdx, startIdx + state.tablePageSize);
 
         if (pageItems.length === 0) {
-            dom.tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 24px;">Записи не найдены</td></tr>`;
+            dom.tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Записи не найдены</td></tr>`;
         } else {
             pageItems.forEach((item, idx) => {
                 const metal = METALS_DEF.find(m => m.Id === item.MetalId) || METALS_DEF[0];
                 const tr = document.createElement('tr');
 
                 const prevItem = filtered[startIdx + idx + 1];
-                let deltaHtml = `<span style="color: var(--text-muted);">—</span>`;
+                let deltaHtml = `<span style="color: var(--text-faint);">—</span>`;
                 if (prevItem && prevItem.MetalId === item.MetalId) {
                     const diff = item.Value - prevItem.Value;
                     const pct = prevItem.Value !== 0 ? (diff / prevItem.Value) * 100 : 0;
                     const sign = diff > 0 ? '+' : '';
-                    const color = diff > 0 ? 'var(--delta-pos)' : (diff < 0 ? 'var(--delta-neg)' : 'var(--text-secondary)');
+                    const color = diff > 0 ? 'var(--delta-up)' : (diff < 0 ? 'var(--delta-down)' : 'var(--text-muted)');
                     deltaHtml = `<span style="color: ${color}; font-weight: 500;" class="mono">${sign}${diff.toFixed(2)} BYN (${sign}${pct.toFixed(2)}%)</span>`;
                 }
-
-                let badgeClass = 'badge-gold';
-                if (metal.Id === 1) badgeClass = 'badge-silver';
-                if (metal.Id === 2) badgeClass = 'badge-platinum';
-                if (metal.Id === 3) badgeClass = 'badge-palladium';
 
                 tr.innerHTML = `
                     <td class="mono">${formatDateRU(item.Date)}</td>
                     <td>
-                        <span class="metal-mark-badge ${badgeClass}">${metal.Assay || metal.Symbol}</span>
-                        <span style="margin-left: 6px;">${metal.Name}</span>
+                        <span class="mono" style="font-weight: 600; font-size: 11px; margin-right: 4px;">${metal.Symbol}</span>
+                        <span>${metal.Name}</span>
                     </td>
                     <td class="mono" style="font-weight: 600;">${item.Value.toFixed(2)} BYN</td>
                     <td>${deltaHtml}</td>
@@ -918,7 +879,7 @@
         }
 
         if (dom.pageIndicator) {
-            dom.pageIndicator.textContent = `${state.tablePage} / ${totalPages}`;
+            dom.pageIndicator.textContent = `${state.tablePage} из ${totalPages}`;
         }
         if (dom.prevPageBtn) dom.prevPageBtn.disabled = state.tablePage <= 1;
         if (dom.nextPageBtn) dom.nextPageBtn.disabled = state.tablePage >= totalPages;
@@ -1029,6 +990,12 @@
                 state.selectedPeriod = 'CUSTOM';
 
                 await loadChartData();
+            });
+        }
+
+        if (dom.historyToggleBtn && dom.historyCard) {
+            dom.historyToggleBtn.addEventListener('click', () => {
+                dom.historyCard.classList.toggle('open');
             });
         }
 

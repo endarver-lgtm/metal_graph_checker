@@ -1,74 +1,63 @@
 /**
- * Дизайн-система "Unslop" для трекера драгметаллов НБРБ
- * Направление:
- *  - Character: точный, сдержанный, академичный
- *  - World: финансовые терминалы, банковские мерные слитки, пробирные пробы
- *  - Moments: интерактивный график котировок с чистой сеткой и нормализацией
- *  - Signature: пробирные клейма металлов (Au 999.9, Ag 999) и моноширинные котировки
- *
- * Правила:
- *  - Сетка 4px (Spacing scale: 4, 8, 12, 16, 20, 24, 32, 40)
- *  - Вложенные скругления (Nested radius: 12px карточки, 8px контролы, 4px теги) — никаких повсеместных pills!
- *  - Нейтральный пандус Ink/Graphite light
- *  - Типографика: 400 и 500 веса, моноширинный стек для цифр и дат (tabular-nums)
- *  - СТРОГО БЕЗ ТЕНЕЙ и СТРОГО БЕЗ ГРАДИЕНТОВ
+ * Утонченная, сдержанная дизайн-система для трекера драгметаллов НБРБ
+ * Фокус на главном: Котировка актива -> График -> Параметры
+ * 
+ * Особенности:
+ * - Четкая визуальная иерархия (главное сразу бросается в глаза)
+ * - Убран визуальный шум и нагромождение кнопок
+ * - Комфортная для глаз светлая гамма (Slate/Zinc) без резкого слепящего монохрома
+ * - Элегантная активная вкладка металла (полная заливка, никаких обрубленных полосок)
+ * - СТРОГО БЕЗ ТЕНЕЙ И БЕЗ ГРАДИЕНТОВ
  */
 
 :root {
-    /* Нейтральный пандус (Ink/Graphite light ramp) */
-    --bg-page: #f6f7f9;
-    --bg-card: #ffffff;
-    --bg-raised: #f0f2f5;
-    --bg-active: #e4e7ec;
-    --bg-primary-btn: #111827;
+    /* Фоновые поверхности */
+    --bg-page: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-muted: #f1f5f9;
+    --bg-hover: #e2e8f0;
+    --bg-dark: #0f172a;
 
-    /* Тонкие границы (Hairlines) */
-    --border: #e5e7eb;
-    --border-subtle: #f0f2f5;
-    --border-strong: #111827;
+    /* Границы и разделители */
+    --border-subtle: #f1f5f9;
+    --border-default: #e2e8f0;
+    --border-hover: #cbd5e1;
+    --border-dark: #0f172a;
 
-    /* Роли текста */
-    --text-primary: #111827;
-    --text-secondary: #4b5563;
-    --text-muted: #6b7280;
-    --text-inverse: #ffffff;
+    /* Текстовая иерархия */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --text-faint: #94a3b8;
+    --text-on-dark: #ffffff;
 
-    /* Цвета металлов (акценты только там, где они несут смысл) */
-    --color-gold: #b45309;
-    --color-gold-bg: #fffbeb;
-    --color-gold-border: #fde68a;
+    /* Акценты металлов */
+    --gold: #b45309;
+    --gold-tint: #fef3c7;
+    --silver: #475569;
+    --silver-tint: #f1f5f9;
+    --platinum: #2563eb;
+    --platinum-tint: #eff6ff;
+    --palladium: #0d9488;
+    --palladium-tint: #f0fdfa;
 
-    --color-silver: #475569;
-    --color-silver-bg: #f8fafc;
-    --color-silver-border: #cbd5e1;
+    /* Динамика цен */
+    --delta-up: #16a34a;
+    --delta-up-bg: #f0fdf4;
+    --delta-down: #dc2626;
+    --delta-down-bg: #fef2f2;
 
-    --color-platinum: #2563eb;
-    --color-platinum-bg: #eff6ff;
-    --color-platinum-border: #bfdbfe;
-
-    --color-palladium: #0d9488;
-    --color-palladium-bg: #f0fdfa;
-    --color-palladium-border: #99f6e4;
-
-    /* Семантическая динамика */
-    --delta-pos: #15803d;
-    --delta-pos-bg: #f0fdf4;
-    --delta-neg: #b91c1c;
-    --delta-neg-bg: #fef2f2;
-
-    /* Вложенные радиусы (Nested radius math: panel 14, card 12, control 8, badge 4) */
-    --radius-panel: 14px;
-    --radius-card: 12px;
+    /* Радиусы */
+    --radius-card: 16px;
     --radius-control: 8px;
-    --radius-sm: 6px;
-    --radius-tag: 4px;
+    --radius-pill: 9999px;
 
     /* Шрифты */
-    --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-mono: ui-monospace, "JetBrains Mono", "Geist Mono", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, "JetBrains Mono", "Geist Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* Сброс и жесткий запрет теней / градиентов */
+/* Сброс и жесткий запрет теней и градиентов */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
@@ -79,21 +68,21 @@
 }
 
 body {
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
     background-color: var(--bg-page);
     color: var(--text-primary);
-    line-height: 1.45;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    padding: 24px 20px 48px;
+    padding: 24px 16px 48px;
 }
 
 .mono {
     font-family: var(--font-mono);
-    font-feature-settings: "tnum" 1, "cv01" 1;
+    font-variant-numeric: tabular-nums;
 }
 
-.container {
-    max-width: 1240px;
+.app-shell {
+    max-width: 1180px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -101,80 +90,74 @@ body {
 }
 
 /* ==========================================================================
-   Шапка (Header)
+   Шапка (Минималистичный компактный бар)
    ========================================================================== */
-.header-bar {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-panel);
-    padding: 16px 20px;
+.top-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 12px;
+    padding: 4px 4px 8px;
 }
 
-.brand-section {
+.brand-group {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
-.brand-mark {
-    width: 36px;
-    height: 36px;
-    background-color: var(--bg-raised);
-    border: 1px solid var(--border);
+.brand-icon {
+    width: 32px;
+    height: 32px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
     border-radius: var(--radius-control);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--text-primary);
-    flex-shrink: 0;
 }
 
 .brand-title {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 600;
     letter-spacing: -0.01em;
     color: var(--text-primary);
 }
 
-.brand-subtitle {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-top: 2px;
+.brand-source {
+    font-size: 12px;
+    color: var(--text-muted);
 }
 
-.header-actions {
+.top-actions {
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
 }
 
-.status-indicator {
+.status-pill {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-secondary);
-    background-color: var(--bg-raised);
-    border: 1px solid var(--border);
-    padding: 6px 10px;
-    border-radius: var(--radius-sm);
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    padding: 5px 10px;
+    border-radius: var(--radius-pill);
 }
 
 .status-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: var(--delta-pos);
+    background-color: var(--delta-up);
 }
-.status-dot.error { background-color: var(--delta-neg); }
-.status-dot.loading { background-color: var(--color-gold); }
+.status-dot.error { background-color: var(--delta-down); }
+.status-dot.loading { background-color: var(--gold); }
 
 /* Кнопки */
 .btn {
@@ -183,374 +166,319 @@ body {
     justify-content: center;
     gap: 6px;
     font-family: inherit;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
-    height: 34px;
-    padding: 0 14px;
+    height: 30px;
+    padding: 0 12px;
     border-radius: var(--radius-control);
-    border: 1px solid var(--border);
-    background-color: var(--bg-card);
-    color: var(--text-primary);
+    border: 1px solid var(--border-default);
+    background-color: var(--bg-surface);
+    color: var(--text-secondary);
     cursor: pointer;
-    transition: background-color 140ms ease, border-color 140ms ease;
+    transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
     user-select: none;
 }
 
 .btn:hover {
-    background-color: var(--bg-raised);
-    border-color: #d1d5db;
+    background-color: var(--bg-muted);
+    border-color: var(--border-hover);
+    color: var(--text-primary);
 }
 
 .btn:active {
-    background-color: var(--bg-active);
-    transform: scale(0.99);
+    background-color: var(--bg-hover);
 }
 
-.btn-primary {
-    background-color: var(--bg-primary-btn);
-    color: var(--text-inverse);
-    border-color: var(--bg-primary-btn);
+.btn-dark {
+    background-color: var(--bg-dark);
+    color: var(--text-on-dark);
+    border-color: var(--bg-dark);
 }
 
-.btn-primary:hover {
-    background-color: #1f2937;
-    border-color: #1f2937;
-}
-
-.btn-icon-only {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border-radius: var(--radius-control);
+.btn-dark:hover {
+    background-color: #1e293b;
+    border-color: #1e293b;
+    color: #ffffff;
 }
 
 /* ==========================================================================
-   Выбор металла (Metal Instrument Cards)
+   Главная Hero-карточка: Актив + Котировка + Переключатель металлов
    ========================================================================== */
-.metal-selector-section {
+.hero-overview-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-card);
+    padding: 20px 24px 16px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 16px;
 }
 
-.section-label {
-    font-size: 12px;
+.hero-main-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.hero-asset-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.hero-asset-title {
+    font-size: 14px;
     font-weight: 500;
     color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding-left: 2px;
-}
-
-.metals-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 10px;
-}
-
-.metal-card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    padding: 14px 16px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    transition: border-color 140ms ease, background-color 140ms ease;
-    user-select: none;
-    position: relative;
-}
-
-.metal-card:hover {
-    border-color: #cbd5e1;
-    background-color: #fafbfc;
-}
-
-.metal-card.active {
-    border: 1px solid var(--border-strong);
-    background-color: var(--bg-card);
-}
-
-.metal-card.active::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 12px;
-    right: 12px;
-    height: 2px;
-    background-color: var(--border-strong);
-    border-radius: 2px 2px 0 0;
-}
-
-.metal-card-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 8px;
 }
 
-.metal-mark-badge {
+.hero-assay-pill {
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 600;
     padding: 2px 6px;
-    border-radius: var(--radius-tag);
-    border: 1px solid var(--border);
-    background-color: var(--bg-raised);
+    border-radius: var(--radius-control);
+    background-color: var(--bg-muted);
+    border: 1px solid var(--border-default);
     color: var(--text-secondary);
 }
 
-.badge-gold {
-    color: var(--color-gold);
-    background-color: var(--color-gold-bg);
-    border-color: var(--color-gold-border);
-}
-.badge-silver {
-    color: var(--color-silver);
-    background-color: var(--color-silver-bg);
-    border-color: var(--color-silver-border);
-}
-.badge-platinum {
-    color: var(--color-platinum);
-    background-color: var(--color-platinum-bg);
-    border-color: var(--color-platinum-border);
-}
-.badge-palladium {
-    color: var(--color-palladium);
-    background-color: var(--color-palladium-bg);
-    border-color: var(--color-palladium-border);
-}
-
-.metal-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.metal-price-row {
+.hero-price-line {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
-    gap: 8px;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
-.metal-price {
+.hero-price {
     font-family: var(--font-mono);
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
     color: var(--text-primary);
+    line-height: 1.1;
 }
 
-.metal-unit {
-    font-size: 11px;
+.hero-unit {
+    font-size: 13px;
+    font-weight: 400;
     color: var(--text-muted);
+    margin-left: 2px;
 }
 
-.metal-delta-tag {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 500;
-    padding: 2px 6px;
-    border-radius: var(--radius-tag);
+.hero-delta-badge {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: var(--radius-control);
     border: 1px solid transparent;
 }
 
-.delta-up {
-    color: var(--delta-pos);
-    background-color: var(--delta-pos-bg);
+.hero-delta-badge.up {
+    color: var(--delta-up);
+    background-color: var(--delta-up-bg);
     border-color: #bbf7d0;
 }
 
-.delta-down {
-    color: var(--delta-neg);
-    background-color: var(--delta-neg-bg);
+.hero-delta-badge.down {
+    color: var(--delta-down);
+    background-color: var(--delta-down-bg);
     border-color: #fecaca;
 }
 
-.delta-neutral {
+.hero-delta-badge.neutral {
     color: var(--text-secondary);
-    background-color: var(--bg-raised);
-    border-color: var(--border);
+    background-color: var(--bg-muted);
+    border-color: var(--border-default);
 }
 
 /* ==========================================================================
-   Панель фильтра периодов и параметров (Controls Bar)
+   Переключатель металлов (Стильные, чистые вкладки без обрубленных полосок)
    ========================================================================== */
-.controls-bar {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
+.metal-switcher-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.metal-tab {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border-default);
+    background-color: var(--bg-surface);
+    cursor: pointer;
+    transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+    user-select: none;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.metal-tab:hover {
+    background-color: var(--bg-muted);
+    border-color: var(--border-hover);
+}
+
+/* АКТИВНОЕ СОСТОЯНИЕ: Сплошная заливка темным сланцем, белые надписи, никаких палок сверху */
+.metal-tab.active {
+    background-color: var(--bg-dark);
+    border-color: var(--bg-dark);
+    color: var(--text-on-dark);
+}
+
+.metal-tab.active .metal-tab-name {
+    color: var(--text-on-dark);
+}
+
+.metal-tab.active .metal-tab-price {
+    color: #e2e8f0;
+}
+
+.metal-tab.active .metal-tab-mark {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+.metal-tab-mark {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid var(--border-default);
+    background-color: var(--bg-muted);
+    color: var(--text-secondary);
+}
+
+.metal-tab-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.metal-tab-price {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   Единый контейнер графика (Главный фокус страницы)
+   ========================================================================== */
+.chart-workspace-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
     border-radius: var(--radius-card);
-    padding: 10px 14px;
+    padding: 16px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Встроенная панель инструментов графика */
+.chart-integrated-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
 }
 
-.segmented-control {
+/* Переключатели периодов */
+.timeframe-group {
     display: inline-flex;
     align-items: center;
-    background-color: var(--bg-raised);
-    border: 1px solid var(--border);
+    background-color: var(--bg-muted);
+    border: 1px solid var(--border-default);
     border-radius: var(--radius-control);
     padding: 2px;
     gap: 2px;
     overflow-x: auto;
 }
 
-.segment-btn {
+.timeframe-btn {
+    border: none;
     background: transparent;
-    border: 1px solid transparent;
-    color: var(--text-secondary);
     font-family: var(--font-mono);
     font-size: 12px;
     font-weight: 500;
+    color: var(--text-muted);
     padding: 4px 10px;
-    border-radius: var(--radius-sm);
+    border-radius: 6px;
     cursor: pointer;
     white-space: nowrap;
-    transition: background-color 120ms ease, color 120ms ease;
+    transition: background-color 0.1s ease, color 0.1s ease;
 }
 
-.segment-btn:hover {
+.timeframe-btn:hover {
     color: var(--text-primary);
-    background-color: rgba(255, 255, 255, 0.7);
 }
 
-.segment-btn.active {
-    background-color: var(--bg-card);
-    border-color: var(--border);
+.timeframe-btn.active {
+    background-color: var(--bg-surface);
     color: var(--text-primary);
     font-weight: 600;
 }
 
-.custom-range-row {
+.chart-tools-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.custom-date-panel {
     display: flex;
     align-items: center;
     gap: 6px;
     font-size: 12px;
     color: var(--text-secondary);
+    background-color: var(--bg-muted);
+    padding: 4px 8px;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--border-default);
 }
 
-.date-input {
+.date-input-field {
     font-family: var(--font-mono);
-    font-size: 12px;
-    padding: 4px 8px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background-color: var(--bg-card);
+    font-size: 11px;
+    padding: 3px 6px;
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
+    background-color: var(--bg-surface);
     color: var(--text-primary);
     outline: none;
 }
 
-.date-input:focus {
-    border-color: var(--border-strong);
+.date-input-field:focus {
+    border-color: var(--border-dark);
 }
 
-/* ==========================================================================
-   Ключевые показатели (Stats Grid)
-   ========================================================================== */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 10px;
-}
-
-.stat-card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-control);
-    padding: 14px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.stat-header-label {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-
-.stat-numeric-value {
-    font-family: var(--font-mono);
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text-primary);
-    letter-spacing: -0.01em;
-}
-
-.stat-reference-text {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-muted);
-}
-
-/* ==========================================================================
-   Основной график (Chart Card)
-   ========================================================================== */
-.chart-panel-card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-panel);
-    padding: 20px 22px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.chart-header-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid var(--border-subtle);
-}
-
-.chart-info-block {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.chart-heading {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.chart-subheading {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text-secondary);
-}
-
-.chart-toolbar-actions {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.chart-viewport {
+/* Холст графика */
+.chart-viewport-box {
     position: relative;
     width: 100%;
     height: 400px;
 }
 
-.chart-loading-mask {
+.chart-overlay-loader {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.9);
+    inset: 0;
+    background-color: rgba(255, 255, 255, 0.88);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -560,208 +488,242 @@ body {
     z-index: 10;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 150ms ease;
+    transition: opacity 0.15s ease;
 }
 
-.chart-loading-mask.visible {
+.chart-overlay-loader.visible {
     opacity: 1;
     pointer-events: auto;
 }
 
-.quiet-spinner {
-    width: 24px;
-    height: 24px;
-    border: 2px solid var(--border);
+.loader-spinner {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border-default);
     border-top-color: var(--text-primary);
     border-radius: 50%;
-    animation: quiet-spin 0.75s linear infinite;
+    animation: rotate-spin 0.7s linear infinite;
 }
 
-@keyframes quiet-spin {
+@keyframes rotate-spin {
     to { transform: rotate(360deg); }
 }
 
-.loading-label {
+.loader-text {
     font-family: var(--font-mono);
     font-size: 12px;
     color: var(--text-secondary);
 }
 
-/* ==========================================================================
-   Таблица истории котировок (Ledger Table)
-   ========================================================================== */
-.table-panel-card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-panel);
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
+/* Компактная полоса статистики прямо под графиком */
+.chart-stats-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
     gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-subtle);
 }
 
-.table-top-bar {
+.stat-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.stat-cell-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.stat-cell-value {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.stat-cell-sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-faint);
+}
+
+/* ==========================================================================
+   Раскрывающаяся панель истории (Компактный аккордеон, не захламляет экран)
+   ========================================================================== */
+.history-collapsible-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+}
+
+.history-toggle-header {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 14px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-primary);
+    transition: background-color 0.12s ease;
 }
 
-.table-heading {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-primary);
+.history-toggle-header:hover {
+    background-color: #fafbfc;
+}
+
+.history-title-block {
     display: flex;
     align-items: center;
     gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
 }
 
-.records-counter {
+.badge-count {
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 500;
-    background-color: var(--bg-raised);
-    border: 1px solid var(--border);
     padding: 2px 6px;
-    border-radius: var(--radius-tag);
-    color: var(--text-secondary);
+    border-radius: 4px;
+    background-color: var(--bg-muted);
+    border: 1px solid var(--border-default);
+    color: var(--text-muted);
 }
 
-.search-field {
+.history-chevron {
+    transition: transform 0.2s ease;
+    color: var(--text-muted);
+}
+
+.history-collapsible-card.open .history-chevron {
+    transform: rotate(180deg);
+}
+
+.history-content {
+    display: none;
+    padding: 0 18px 16px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.history-collapsible-card.open .history-content {
+    display: block;
+}
+
+.history-search-row {
+    padding: 12px 0 10px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.search-input-clean {
     font-family: inherit;
     font-size: 12px;
-    padding: 5px 10px;
-    border: 1px solid var(--border);
+    padding: 6px 10px;
+    border: 1px solid var(--border-default);
     border-radius: var(--radius-control);
-    background-color: var(--bg-raised);
+    background-color: var(--bg-muted);
     color: var(--text-primary);
     outline: none;
-    width: 180px;
+    width: 200px;
 }
 
-.search-field:focus {
-    border-color: var(--border-strong);
-    background-color: var(--bg-card);
+.search-input-clean:focus {
+    background-color: var(--bg-surface);
+    border-color: var(--border-dark);
 }
 
-.table-wrap {
-    overflow-x: auto;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-control);
-}
-
-.ledger-table {
+.clean-table {
     width: 100%;
     border-collapse: collapse;
-    text-align: left;
     font-size: 13px;
+    text-align: left;
 }
 
-.ledger-table th {
-    background-color: var(--bg-raised);
-    color: var(--text-secondary);
-    font-size: 12px;
+.clean-table th {
+    font-size: 11px;
     font-weight: 500;
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-default);
 }
 
-.ledger-table td {
-    padding: 8px 12px;
+.clean-table td {
+    padding: 8px 10px;
     border-bottom: 1px solid var(--border-subtle);
     color: var(--text-primary);
-    white-space: nowrap;
 }
 
-.ledger-table tbody tr:last-child td {
-    border-bottom: none;
+.clean-table tr:hover {
+    background-color: #fafbfc;
 }
 
-.ledger-table tbody tr:hover {
-    background-color: #fcfdfe;
-}
-
-.table-footer-bar {
+.pagination-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding-top: 10px;
     font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text-secondary);
-    padding-top: 2px;
+    font-size: 11px;
+    color: var(--text-muted);
 }
 
 /* ==========================================================================
-   Подвал (Footer)
+   Подвал
    ========================================================================== */
-.footer-text {
+.page-footer {
     text-align: center;
     font-size: 12px;
-    color: var(--text-muted);
-    padding: 8px 16px;
+    color: var(--text-faint);
+    padding: 8px;
     line-height: 1.6;
 }
 
-.footer-text a {
-    color: var(--text-secondary);
+.page-footer a {
+    color: var(--text-muted);
     text-decoration: underline;
     text-underline-offset: 2px;
 }
 
-.footer-text a:hover {
+.page-footer a:hover {
     color: var(--text-primary);
 }
 
 /* ==========================================================================
-   Адаптивность (Mobile & Tablet)
+   Адаптивность (Mobile)
    ========================================================================== */
 @media (max-width: 768px) {
     body {
-        padding: 14px 10px 32px;
+        padding: 12px 8px 32px;
     }
 
-    .header-bar {
-        padding: 14px;
-    }
-
-    .metals-grid {
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 8px;
-    }
-
-    .metal-card {
-        padding: 10px 12px;
-    }
-
-    .metal-price {
-        font-size: 16px;
-    }
-
-    .controls-bar {
-        padding: 10px;
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .segmented-control {
-        justify-content: flex-start;
-    }
-
-    .custom-range-row {
-        justify-content: space-between;
-    }
-
-    .chart-panel-card {
+    .hero-overview-card {
         padding: 16px;
     }
 
-    .chart-viewport {
-        height: 320px;
+    .hero-price {
+        font-size: 26px;
     }
 
-    .table-panel-card {
+    .chart-workspace-card {
         padding: 14px;
+    }
+
+    .chart-viewport-box {
+        height: 310px;
+    }
+
+    .chart-stats-strip {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
     }
 }
