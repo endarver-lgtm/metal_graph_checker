@@ -145,13 +145,12 @@ function renderMetalTabs() {
     allTab.className = `metal-tab ${state.selectedMetalId === 'all' ? 'active' : ''}`;
     allTab.dataset.metalId = 'all';
     allTab.innerHTML = `
-        <span class="metal-tab-mark">ALL</span>
-        <span class="metal-tab-name">Все 4 металла</span>
+        <span class="metal-tab-name">Все металлы</span>
     `;
     allTab.addEventListener('click', () => selectMetal('all'));
     dom.metalCardsContainer.appendChild(allTab);
 
-    // Табы отдельных металлов
+    // Табы отдельных металлов (чистые названия и котировки, без лишних меток AU/AG)
     state.metals.forEach(metal => {
         const latest = state.latestPrices.get(metal.Id);
         const priceText = latest ? `${latest.Value.toFixed(2)} BYN` : '—';
@@ -160,7 +159,6 @@ function renderMetalTabs() {
         tab.dataset.metalId = metal.Id;
 
         tab.innerHTML = `
-            <span class="metal-tab-mark">${metal.Symbol}</span>
             <span class="metal-tab-name">${metal.Name}</span>
             <span class="metal-tab-price">${priceText}</span>
         `;
@@ -270,8 +268,8 @@ function updateHeroAndStats() {
     const metal = METALS_DEF.find(m => String(m.Id) === String(state.selectedMetalId));
 
     if (isAll) {
-        if (dom.heroMetalTitle) dom.heroMetalTitle.textContent = 'Сводный обзор металлов';
-        if (dom.heroAssayPill) dom.heroAssayPill.textContent = 'Au • Ag • Pt • Pd';
+        if (dom.heroMetalTitle) dom.heroMetalTitle.textContent = 'Все металлы';
+        if (dom.heroAssayPill) dom.heroAssayPill.style.display = 'none';
 
         // Берем статистику по золоту как эталону
         const goldPrices = state.currentPrices.filter(p => p.MetalId === 0);
@@ -291,7 +289,10 @@ function updateHeroAndStats() {
         const stats = calculateStats(state.currentPrices);
 
         if (dom.heroMetalTitle && metal) dom.heroMetalTitle.textContent = metal.Name;
-        if (dom.heroAssayPill && metal) dom.heroAssayPill.textContent = metal.Assay || metal.Symbol;
+        if (dom.heroAssayPill && metal) {
+            dom.heroAssayPill.textContent = metal.Assay || metal.Symbol;
+            dom.heroAssayPill.style.display = 'inline-block';
+        }
 
         if (stats && dom.heroPrice) {
             dom.heroPrice.textContent = `${stats.currentPrice.toFixed(2)}`;

@@ -635,8 +635,7 @@
         allTab.className = `metal-tab ${state.selectedMetalId === 'all' ? 'active' : ''}`;
         allTab.dataset.metalId = 'all';
         allTab.innerHTML = `
-            <span class="metal-tab-mark">ALL</span>
-            <span class="metal-tab-name">Все 4 металла</span>
+            <span class="metal-tab-name">Все металлы</span>
         `;
         allTab.addEventListener('click', () => selectMetal('all'));
         dom.metalCardsContainer.appendChild(allTab);
@@ -649,7 +648,6 @@
             tab.dataset.metalId = metal.Id;
 
             tab.innerHTML = `
-                <span class="metal-tab-mark">${metal.Symbol}</span>
                 <span class="metal-tab-name">${metal.Name}</span>
                 <span class="metal-tab-price">${priceText}</span>
             `;
@@ -756,8 +754,8 @@
         const metal = METALS_DEF.find(m => String(m.Id) === String(state.selectedMetalId));
 
         if (isAll) {
-            if (dom.heroMetalTitle) dom.heroMetalTitle.textContent = 'Сводный обзор металлов';
-            if (dom.heroAssayPill) dom.heroAssayPill.textContent = 'Au • Ag • Pt • Pd';
+            if (dom.heroMetalTitle) dom.heroMetalTitle.textContent = 'Все металлы';
+            if (dom.heroAssayPill) dom.heroAssayPill.style.display = 'none';
 
             const goldPrices = state.currentPrices.filter(p => p.MetalId === 0);
             const stats = calculateStats(goldPrices);
@@ -776,7 +774,10 @@
             const stats = calculateStats(state.currentPrices);
 
             if (dom.heroMetalTitle && metal) dom.heroMetalTitle.textContent = metal.Name;
-            if (dom.heroAssayPill && metal) dom.heroAssayPill.textContent = metal.Assay || metal.Symbol;
+            if (dom.heroAssayPill && metal) {
+                dom.heroAssayPill.textContent = metal.Assay || metal.Symbol;
+                dom.heroAssayPill.style.display = 'inline-block';
+            }
 
             if (stats && dom.heroPrice) {
                 dom.heroPrice.textContent = `${stats.currentPrice.toFixed(2)}`;
