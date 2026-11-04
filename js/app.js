@@ -1,5 +1,6 @@
 /**
  * Главный модуль приложения котировок металлов НБРБ
+ * Редизайн в соответствии с принципами Unslop
  */
 
 import {
@@ -9,8 +10,7 @@ import {
     fetchPricesRange,
     calculateStats,
     formatDateISO,
-    formatDateRU,
-    formatDateFullRU
+    formatDateRU
 } from './api.js';
 
 import {
@@ -18,16 +18,15 @@ import {
     exportChartAsPNG
 } from './chart.js';
 
-// Состояние приложения
 const state = {
-    selectedMetalId: '0', // 0 = Золото по умолчанию, или 1, 2, 3, 'all'
-    selectedPeriod: '1Y', // 7D, 1M, 3M, 6M, 1Y, 3Y, 5Y, MAX, CUSTOM
+    selectedMetalId: '0', // Золото по умолчанию
+    selectedPeriod: '1Y', // 1 год
     startDate: '',
     endDate: '',
     latestPrices: new Map(),
-    currentPrices: [], // Записи котировок за выбранный период
+    currentPrices: [],
     metals: METALS_DEF,
-    normalizePercent: false, // Для режима 'all'
+    normalizePercent: false,
     showPoints: false,
     tableSearch: '',
     tablePage: 1,
@@ -35,64 +34,56 @@ const state = {
     isLoading: false
 };
 
-// DOM элементы
-const dom = {
-    // Статус и кнопки шапки
-    statusDot: document.getElementById('statusDot'),
-    statusText: document.getElementById('statusText'),
-    refreshBtn: document.getElementById('refreshBtn'),
-    exportCsvBtn: document.getElementById('exportCsvBtn'),
+const dom = {};
 
-    // Карточки металлов
-    metalCardsContainer: document.getElementById('metalCardsContainer'),
+function cacheDomElements() {
+    dom.statusDot = document.getElementById('statusDot');
+    dom.statusText = document.getElementById('statusText');
+    dom.refreshBtn = document.getElementById('refreshBtn');
+    dom.exportCsvBtn = document.getElementById('exportCsvBtn');
 
-    // Периоды
-    periodPills: document.querySelectorAll('.period-pill'),
-    customDateContainer: document.getElementById('customDateContainer'),
-    dateStartInput: document.getElementById('dateStartInput'),
-    dateEndInput: document.getElementById('dateEndInput'),
-    applyCustomDateBtn: document.getElementById('applyCustomDateBtn'),
+    dom.metalCardsContainer = document.getElementById('metalCardsContainer');
 
-    // Статистика
-    statCurrentPrice: document.getElementById('statCurrentPrice'),
-    statCurrentDate: document.getElementById('statCurrentDate'),
-    statDelta: document.getElementById('statDelta'),
-    statDeltaSub: document.getElementById('statDeltaSub'),
-    statMaxPrice: document.getElementById('statMaxPrice'),
-    statMaxDate: document.getElementById('statMaxDate'),
-    statMinPrice: document.getElementById('statMinPrice'),
-    statMinDate: document.getElementById('statMinDate'),
-    statAvgPrice: document.getElementById('statAvgPrice'),
+    dom.periodPills = document.querySelectorAll('.segment-btn[data-period]');
+    dom.customDateContainer = document.getElementById('customDateContainer');
+    dom.dateStartInput = document.getElementById('dateStartInput');
+    dom.dateEndInput = document.getElementById('dateEndInput');
+    dom.applyCustomDateBtn = document.getElementById('applyCustomDateBtn');
 
-    // График
-    chartTitle: document.getElementById('chartTitle'),
-    chartSubtitle: document.getElementById('chartSubtitle'),
-    chartCanvas: document.getElementById('metalChart'),
-    chartLoadingOverlay: document.getElementById('chartLoadingOverlay'),
-    loadingMessage: document.getElementById('loadingMessage'),
-    togglePointsBtn: document.getElementById('togglePointsBtn'),
-    normalizeToggleWrapper: document.getElementById('normalizeToggleWrapper'),
-    modeBynBtn: document.getElementById('modeBynBtn'),
-    modePctBtn: document.getElementById('modePctBtn'),
-    exportPngBtn: document.getElementById('exportPngBtn'),
+    dom.statCurrentPrice = document.getElementById('statCurrentPrice');
+    dom.statCurrentDate = document.getElementById('statCurrentDate');
+    dom.statDelta = document.getElementById('statDelta');
+    dom.statDeltaSub = document.getElementById('statDeltaSub');
+    dom.statMaxPrice = document.getElementById('statMaxPrice');
+    dom.statMaxDate = document.getElementById('statMaxDate');
+    dom.statMinPrice = document.getElementById('statMinPrice');
+    dom.statMinDate = document.getElementById('statMinDate');
+    dom.statAvgPrice = document.getElementById('statAvgPrice');
 
-    // Таблица истории
-    tableBody: document.getElementById('tableBody'),
-    tableCountBadge: document.getElementById('tableCountBadge'),
-    tableSearchInput: document.getElementById('tableSearchInput'),
-    prevPageBtn: document.getElementById('prevPageBtn'),
-    nextPageBtn: document.getElementById('nextPageBtn'),
-    pageIndicator: document.getElementById('pageIndicator')
-};
+    dom.chartTitle = document.getElementById('chartTitle');
+    dom.chartSubtitle = document.getElementById('chartSubtitle');
+    dom.chartCanvas = document.getElementById('metalChart');
+    dom.chartLoadingOverlay = document.getElementById('chartLoadingOverlay');
+    dom.loadingMessage = document.getElementById('loadingMessage');
+    dom.togglePointsBtn = document.getElementById('togglePointsBtn');
+    dom.normalizeToggleWrapper = document.getElementById('normalizeToggleWrapper');
+    dom.modeBynBtn = document.getElementById('modeBynBtn');
+    dom.modePctBtn = document.getElementById('modePctBtn');
+    dom.exportPngBtn = document.getElementById('exportPngBtn');
 
-/**
- * Инициализация при старте
- */
+    dom.tableBody = document.getElementById('tableBody');
+    dom.tableCountBadge = document.getElementById('tableCountBadge');
+    dom.tableSearchInput = document.getElementById('tableSearchInput');
+    dom.prevPageBtn = document.getElementById('prevPageBtn');
+    dom.nextPageBtn = document.getElementById('nextPageBtn');
+    dom.pageIndicator = document.getElementById('pageIndicator');
+}
+
 async function initApp() {
+    cacheDomElements();
     setupEventListeners();
     updateDateInputsForPeriod(state.selectedPeriod);
 
-    // Загружаем актуальные металлы и текущие котировки
     try {
         setLoadingStatus('Синхронизация с api.nbrb.by...');
         const [metals, latest] = await Promise.all([
@@ -106,20 +97,16 @@ async function initApp() {
         }
 
         renderMetalCards();
-        setOnlineStatus(true, 'Онлайн: api.nbrb.by');
+        setOnlineStatus(true, 'api.nbrb.by: онлайн');
     } catch (e) {
         console.error('Ошибка первичной загрузки:', e);
         setOnlineStatus(false, 'Автономный режим');
         renderMetalCards();
     }
 
-    // Загружаем данные для графика
     await loadChartData();
 }
 
-/**
- * Установка статуса соединения
- */
 function setOnlineStatus(isOnline, text) {
     if (dom.statusDot && dom.statusText) {
         dom.statusDot.className = 'status-dot' + (isOnline ? '' : ' error');
@@ -127,10 +114,7 @@ function setOnlineStatus(isOnline, text) {
     }
 }
 
-/**
- * Установка состояния загрузки
- */
-function setLoadingStatus(message = 'Загрузка котировок...') {
+function setLoadingStatus(message = 'Загрузка архива котировок...') {
     if (dom.loadingMessage) dom.loadingMessage.textContent = message;
     if (dom.chartLoadingOverlay) dom.chartLoadingOverlay.classList.add('visible');
     state.isLoading = true;
@@ -141,9 +125,6 @@ function clearLoadingStatus() {
     state.isLoading = false;
 }
 
-/**
- * Отрисовка верхних карточек выбора металла
- */
 function renderMetalCards() {
     if (!dom.metalCardsContainer) return;
     dom.metalCardsContainer.innerHTML = '';
@@ -154,19 +135,19 @@ function renderMetalCards() {
     allCard.dataset.metalId = 'all';
     allCard.innerHTML = `
         <div class="metal-card-header">
-            <span class="metal-badge badge-all">Все 4</span>
+            <span class="metal-mark-badge">ALL</span>
             <span class="metal-name">Все металлы</span>
         </div>
         <div class="metal-price-row">
-            <span class="metal-price" style="font-size: 15px;">Сравнение</span>
+            <span class="metal-price" style="font-size: 15px; font-weight: 500;">Сводный обзор</span>
             <span class="metal-unit">Au, Ag, Pt, Pd</span>
         </div>
-        <div class="metal-delta delta-neutral">Мульти-график</div>
+        <div class="metal-delta-tag delta-neutral">Мульти-график</div>
     `;
     allCard.addEventListener('click', () => selectMetal('all'));
     dom.metalCardsContainer.appendChild(allCard);
 
-    // Карточки конкретных металлов
+    // Карточки отдельных металлов с пробирными метками
     state.metals.forEach(metal => {
         const latest = state.latestPrices.get(metal.Id);
         const priceText = latest ? `${latest.Value.toFixed(2)} BYN` : '—';
@@ -181,14 +162,14 @@ function renderMetalCards() {
 
         card.innerHTML = `
             <div class="metal-card-header">
-                <span class="metal-badge ${badgeClass}">${metal.Symbol}</span>
+                <span class="metal-mark-badge ${badgeClass}">${metal.Assay || metal.Symbol}</span>
                 <span class="metal-name">${metal.Name}</span>
             </div>
             <div class="metal-price-row">
                 <span class="metal-price">${priceText}</span>
                 <span class="metal-unit">BYN / г</span>
             </div>
-            <div class="metal-delta delta-neutral" id="metalCardDelta_${metal.Id}">Официальный курс</div>
+            <div class="metal-delta-tag delta-neutral" id="metalCardDelta_${metal.Id}">За 1 г слитка</div>
         `;
 
         card.addEventListener('click', () => selectMetal(String(metal.Id)));
@@ -196,14 +177,10 @@ function renderMetalCards() {
     });
 }
 
-/**
- * Выбор металла
- */
 async function selectMetal(metalId) {
     if (state.selectedMetalId === metalId && !state.isLoading) return;
     state.selectedMetalId = metalId;
 
-    // Обновляем визуальный активный класс карточек
     const cards = dom.metalCardsContainer.querySelectorAll('.metal-card');
     cards.forEach(c => {
         if (c.dataset.metalId === String(metalId)) {
@@ -213,17 +190,13 @@ async function selectMetal(metalId) {
         }
     });
 
-    // Показываем переключатель "Нормализовать %" только для режима 'all'
     if (dom.normalizeToggleWrapper) {
-        dom.normalizeToggleWrapper.style.display = metalId === 'all' ? 'flex' : 'none';
+        dom.normalizeToggleWrapper.style.display = metalId === 'all' ? 'inline-flex' : 'none';
     }
 
     await loadChartData();
 }
 
-/**
- * Рассчитывает даты начала и окончания для выбранного пресета периода
- */
 function updateDateInputsForPeriod(period) {
     const end = new Date();
     const start = new Date();
@@ -254,7 +227,7 @@ function updateDateInputsForPeriod(period) {
             start.setFullYear(2020, 0, 1);
             break;
         case 'CUSTOM':
-            return; // Не перезаписываем кастомные поля
+            return;
     }
 
     state.startDate = formatDateISO(start);
@@ -264,16 +237,13 @@ function updateDateInputsForPeriod(period) {
     if (dom.dateEndInput) dom.dateEndInput.value = state.endDate;
 }
 
-/**
- * Загрузка данных для графика и статистики
- */
 async function loadChartData() {
-    setLoadingStatus('Загрузка данных из НБРБ...');
+    setLoadingStatus('Загрузка архива НБРБ...');
 
     try {
         const onProgress = (loaded, total) => {
             if (total > 1) {
-                setLoadingStatus(`Загрузка архива: порция ${loaded} из ${total}...`);
+                setLoadingStatus(`Загрузка архива: интервал ${loaded} из ${total}...`);
             }
         };
 
@@ -290,7 +260,7 @@ async function loadChartData() {
         updateTitlesAndStats();
         updateChart();
         renderTable();
-        setOnlineStatus(true, 'Онлайн: данные актуальны');
+        setOnlineStatus(true, 'api.nbrb.by: актуально');
     } catch (err) {
         console.error('Ошибка загрузки данных котировок:', err);
         setOnlineStatus(false, 'Сбой загрузки данных');
@@ -299,46 +269,40 @@ async function loadChartData() {
     }
 }
 
-/**
- * Обновление заголовков и карточек статистики
- */
 function updateTitlesAndStats() {
     const isAll = state.selectedMetalId === 'all';
     const metal = METALS_DEF.find(m => String(m.Id) === String(state.selectedMetalId));
-    const metalName = isAll ? 'Все металлы (сравнение)' : (metal ? `${metal.Name} (${metal.Symbol})` : 'Металл');
+    const metalTitle = isAll
+        ? 'Сравнительная динамика котировок (Au, Ag, Pt, Pd)'
+        : (metal ? `${metal.Name} (${metal.Assay || metal.Symbol}) — динамика учетной цены` : 'Динамика котировок');
 
     if (dom.chartTitle) {
-        dom.chartTitle.textContent = `Динамика курса: ${metalName}`;
+        dom.chartTitle.textContent = metalTitle;
     }
     if (dom.chartSubtitle) {
-        dom.chartSubtitle.textContent = `Период: с ${formatDateRU(state.startDate)} по ${formatDateRU(state.endDate)} • Официальные данные НБРБ`;
+        dom.chartSubtitle.textContent = `${formatDateRU(state.startDate)} — ${formatDateRU(state.endDate)} • Официальные котировки НБРБ`;
     }
 
     if (isAll) {
-        // В режиме 'all' статистика рассчитывается по Золоту как эталону, либо сводная
         const goldPrices = state.currentPrices.filter(p => p.MetalId === 0);
         const stats = calculateStats(goldPrices);
-        renderStatsValues(stats, 'Золото (эталон)');
+        renderStatsValues(stats, 'Золото');
     } else {
         const stats = calculateStats(state.currentPrices);
-        renderStatsValues(stats, metalName);
+        renderStatsValues(stats, metal ? metal.Name : '');
 
-        // Обновим дельту на карточке выбранного металла
         if (stats && metal) {
             const cardDelta = document.getElementById(`metalCardDelta_${metal.Id}`);
             if (cardDelta) {
                 const sign = stats.changeAbs > 0 ? '+' : '';
                 const cssClass = stats.changeAbs > 0 ? 'delta-up' : (stats.changeAbs < 0 ? 'delta-down' : 'delta-neutral');
-                cardDelta.className = `metal-delta ${cssClass}`;
+                cardDelta.className = `metal-delta-tag ${cssClass}`;
                 cardDelta.textContent = `${sign}${stats.changePercent.toFixed(1)}% (${sign}${stats.changeAbs.toFixed(2)} BYN)`;
             }
         }
     }
 }
 
-/**
- * Отрисовка значений в 5 карточках статистики
- */
 function renderStatsValues(stats, contextLabel) {
     if (!stats) {
         if (dom.statCurrentPrice) dom.statCurrentPrice.textContent = '—';
@@ -354,31 +318,31 @@ function renderStatsValues(stats, contextLabel) {
         dom.statCurrentPrice.textContent = `${stats.currentPrice.toFixed(2)} BYN`;
     }
     if (dom.statCurrentDate) {
-        dom.statCurrentDate.textContent = formatDateRU(stats.lastDate);
+        dom.statCurrentDate.textContent = `на ${formatDateRU(stats.lastDate)}`;
     }
 
     if (dom.statDelta) {
         const sign = stats.changeAbs > 0 ? '+' : '';
         dom.statDelta.textContent = `${sign}${stats.changeAbs.toFixed(2)} BYN`;
-        dom.statDelta.style.color = stats.changeAbs > 0 ? 'var(--success)' : (stats.changeAbs < 0 ? 'var(--danger)' : 'var(--text-primary)');
+        dom.statDelta.style.color = stats.changeAbs > 0 ? 'var(--delta-pos)' : (stats.changeAbs < 0 ? 'var(--delta-neg)' : 'var(--text-primary)');
     }
     if (dom.statDeltaSub) {
         const sign = stats.changePercent > 0 ? '+' : '';
-        dom.statDeltaSub.textContent = `${sign}${stats.changePercent.toFixed(2)}% за период`;
+        dom.statDeltaSub.textContent = `${sign}${stats.changePercent.toFixed(2)}% к началу периода`;
     }
 
     if (dom.statMaxPrice) {
         dom.statMaxPrice.textContent = `${stats.maxPrice.toFixed(2)} BYN`;
     }
     if (dom.statMaxDate) {
-        dom.statMaxDate.textContent = formatDateRU(stats.maxDate);
+        dom.statMaxDate.textContent = `пик ${formatDateRU(stats.maxDate)}`;
     }
 
     if (dom.statMinPrice) {
         dom.statMinPrice.textContent = `${stats.minPrice.toFixed(2)} BYN`;
     }
     if (dom.statMinDate) {
-        dom.statMinDate.textContent = formatDateRU(stats.minDate);
+        dom.statMinDate.textContent = `минимум ${formatDateRU(stats.minDate)}`;
     }
 
     if (dom.statAvgPrice) {
@@ -386,9 +350,6 @@ function renderStatsValues(stats, contextLabel) {
     }
 }
 
-/**
- * Обновление графика
- */
 function updateChart() {
     renderMetalChart(dom.chartCanvas, state.currentPrices, state.selectedMetalId, {
         showPoints: state.showPoints,
@@ -396,16 +357,12 @@ function updateChart() {
     });
 }
 
-/**
- * Отрисовка таблицы истории котировок
- */
 function renderTable() {
     if (!dom.tableBody) return;
     dom.tableBody.innerHTML = '';
 
-    // Фильтрация по поиску
     const query = state.tableSearch.trim().toLowerCase();
-    let filtered = state.currentPrices.slice().reverse(); // Свежие сверху
+    let filtered = state.currentPrices.slice().reverse();
 
     if (query) {
         filtered = filtered.filter(item => {
@@ -417,7 +374,7 @@ function renderTable() {
     }
 
     if (dom.tableCountBadge) {
-        dom.tableCountBadge.textContent = `${filtered.length} записей`;
+        dom.tableCountBadge.textContent = `${filtered.length}`;
     }
 
     const totalPages = Math.ceil(filtered.length / state.tablePageSize) || 1;
@@ -434,54 +391,53 @@ function renderTable() {
             const metal = METALS_DEF.find(m => m.Id === item.MetalId) || METALS_DEF[0];
             const tr = document.createElement('tr');
 
-            // Предыдущий элемент для подсчета изменения к предыдущей записи
             const prevItem = filtered[startIdx + idx + 1];
             let deltaHtml = `<span style="color: var(--text-muted);">—</span>`;
             if (prevItem && prevItem.MetalId === item.MetalId) {
                 const diff = item.Value - prevItem.Value;
                 const pct = prevItem.Value !== 0 ? (diff / prevItem.Value) * 100 : 0;
                 const sign = diff > 0 ? '+' : '';
-                const color = diff > 0 ? 'var(--success)' : (diff < 0 ? 'var(--danger)' : 'var(--text-secondary)');
-                deltaHtml = `<span style="color: ${color}; font-weight: 500;">${sign}${diff.toFixed(2)} BYN (${sign}${pct.toFixed(2)}%)</span>`;
+                const color = diff > 0 ? 'var(--delta-pos)' : (diff < 0 ? 'var(--delta-neg)' : 'var(--text-secondary)');
+                deltaHtml = `<span style="color: ${color}; font-weight: 500;" class="mono">${sign}${diff.toFixed(2)} BYN (${sign}${pct.toFixed(2)}%)</span>`;
             }
 
+            let badgeClass = 'badge-gold';
+            if (metal.Id === 1) badgeClass = 'badge-silver';
+            if (metal.Id === 2) badgeClass = 'badge-platinum';
+            if (metal.Id === 3) badgeClass = 'badge-palladium';
+
             tr.innerHTML = `
-                <td style="font-weight: 500;">${formatDateRU(item.Date)}</td>
+                <td class="mono">${formatDateRU(item.Date)}</td>
                 <td>
-                    <span class="metal-badge badge-${metal.Symbol.toLowerCase()}">${metal.Symbol}</span>
+                    <span class="metal-mark-badge ${badgeClass}">${metal.Assay || metal.Symbol}</span>
                     <span style="margin-left: 6px;">${metal.Name}</span>
                 </td>
-                <td style="font-weight: 600;">${item.Value.toFixed(2)} BYN</td>
+                <td class="mono" style="font-weight: 600;">${item.Value.toFixed(2)} BYN</td>
                 <td>${deltaHtml}</td>
             `;
             dom.tableBody.appendChild(tr);
         });
     }
 
-    // Пагинация
     if (dom.pageIndicator) {
-        dom.pageIndicator.textContent = `Стр. ${state.tablePage} из ${totalPages}`;
+        dom.pageIndicator.textContent = `${state.tablePage} / ${totalPages}`;
     }
     if (dom.prevPageBtn) dom.prevPageBtn.disabled = state.tablePage <= 1;
     if (dom.nextPageBtn) dom.nextPageBtn.disabled = state.tablePage >= totalPages;
 }
 
-/**
- * Экспорт текущих данных в CSV
- */
 function exportDataAsCSV() {
     if (!state.currentPrices || state.currentPrices.length === 0) {
         alert('Нет данных для экспорта');
         return;
     }
 
-    // UTF-8 BOM для корректного открытия в Excel
-    let csv = '\uFEFFДата;Код металла;Металл;Символ;Цена (BYN/грамм)\n';
+    let csv = '\uFEFFДата;Код металла;Металл;Проба;Цена (BYN/грамм)\n';
 
     state.currentPrices.forEach(item => {
         const metal = METALS_DEF.find(m => m.Id === item.MetalId) || METALS_DEF[0];
         const dateStr = item.Date.slice(0, 10);
-        csv += `${dateStr};${item.MetalId};"${metal.Name}";${metal.Symbol};${item.Value.toFixed(2).replace('.', ',')}\n`;
+        csv += `${dateStr};${item.MetalId};"${metal.Name}";${metal.Assay || metal.Symbol};${item.Value.toFixed(2).replace('.', ',')}\n`;
     });
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -495,30 +451,23 @@ function exportDataAsCSV() {
     URL.revokeObjectURL(url);
 }
 
-/**
- * Навешивание обработчиков событий
- */
 function setupEventListeners() {
-    // Кнопка Обновить
     if (dom.refreshBtn) {
         dom.refreshBtn.addEventListener('click', async () => {
             await loadChartData();
         });
     }
 
-    // Экспорт CSV
     if (dom.exportCsvBtn) {
         dom.exportCsvBtn.addEventListener('click', exportDataAsCSV);
     }
 
-    // Скачать график PNG
     if (dom.exportPngBtn) {
         dom.exportPngBtn.addEventListener('click', () => {
             exportChartAsPNG(`nbrb-metal-chart-${state.selectedMetalId}.png`);
         });
     }
 
-    // Переключатель точек на графике
     if (dom.togglePointsBtn) {
         dom.togglePointsBtn.addEventListener('click', () => {
             state.showPoints = !state.showPoints;
@@ -527,7 +476,6 @@ function setupEventListeners() {
         });
     }
 
-    // Переключатель BYN / % для 'all'
     if (dom.modeBynBtn && dom.modePctBtn) {
         dom.modeBynBtn.addEventListener('click', () => {
             state.normalizePercent = false;
@@ -544,7 +492,6 @@ function setupEventListeners() {
         });
     }
 
-    // Переключение периода (кнопки-пилюли)
     dom.periodPills.forEach(pill => {
         pill.addEventListener('click', async () => {
             const period = pill.dataset.period;
@@ -564,7 +511,6 @@ function setupEventListeners() {
         });
     });
 
-    // Кнопка "Применить" для произвольного диапазона
     if (dom.applyCustomDateBtn) {
         dom.applyCustomDateBtn.addEventListener('click', async () => {
             const startVal = dom.dateStartInput.value;
@@ -588,7 +534,6 @@ function setupEventListeners() {
         });
     }
 
-    // Поиск в таблице
     if (dom.tableSearchInput) {
         dom.tableSearchInput.addEventListener('input', (e) => {
             state.tableSearch = e.target.value;
@@ -597,7 +542,6 @@ function setupEventListeners() {
         });
     }
 
-    // Пагинация таблицы
     if (dom.prevPageBtn) {
         dom.prevPageBtn.addEventListener('click', () => {
             if (state.tablePage > 1) {
@@ -615,5 +559,8 @@ function setupEventListeners() {
     }
 }
 
-// Запуск при загрузке документа
-document.addEventListener('DOMContentLoaded', initApp);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}

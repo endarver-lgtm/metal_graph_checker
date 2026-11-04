@@ -1,23 +1,26 @@
 /**
- * Единый автономный бандл для работы как через http://, так и напрямую через двойной клик file:///
- * Не требует сборщика, запускается в любом браузере.
+ * Единый автономный бандл для работы как через http://, так и напрямую через file:///
+ * Редизайн в соответствии со стандартами Unslop (Damir Sokolovsky)
  */
 (function() {
     'use strict';
 
     /* ==========================================================================
-       1. API И КОНСТАНТЫ (api.js)
+       1. КОНСТАНТЫ И РЕЕСТР МЕТАЛЛОВ (api)
        ========================================================================== */
 
     const METALS_DEF = [
-        { Id: 0, Symbol: 'Au', Name: 'Золото', NameEng: 'Gold', NameBel: 'Золата', Color: '#b45309', BgLight: '#fef3c7', Border: '#f59e0b' },
-        { Id: 1, Symbol: 'Ag', Name: 'Серебро', NameEng: 'Silver', NameBel: 'Серабро', Color: '#475569', BgLight: '#f1f5f9', Border: '#94a3b8' },
-        { Id: 2, Symbol: 'Pt', Name: 'Платина', NameEng: 'Platinum', NameBel: 'Плаціна', Color: '#2563eb', BgLight: '#eff6ff', Border: '#60a5fa' },
-        { Id: 3, Symbol: 'Pd', Name: 'Палладий', NameEng: 'Palladium', NameBel: 'Паладый', Color: '#0f766e', BgLight: '#ccfbf1', Border: '#2dd4bf' }
+        { Id: 0, Symbol: 'Au', Assay: 'Au 999.9', Name: 'Золото', NameEng: 'Gold', NameBel: 'Золата', Color: '#b45309', BgSubtle: 'rgba(180, 83, 9, 0.04)' },
+        { Id: 1, Symbol: 'Ag', Assay: 'Ag 999.0', Name: 'Серебро', NameEng: 'Silver', NameBel: 'Серабро', Color: '#475569', BgSubtle: 'rgba(71, 85, 105, 0.04)' },
+        { Id: 2, Symbol: 'Pt', Assay: 'Pt 999.5', Name: 'Платина', NameEng: 'Platinum', NameBel: 'Плаціна', Color: '#2563eb', BgSubtle: 'rgba(37, 99, 235, 0.04)' },
+        { Id: 3, Symbol: 'Pd', Assay: 'Pd 999.8', Name: 'Палладий', NameEng: 'Palladium', NameBel: 'Паладый', Color: '#0d9488', BgSubtle: 'rgba(13, 148, 136, 0.04)' }
     ];
 
     const API_BASE = 'https://api.nbrb.by';
     const memoryCache = new Map();
+
+    const FONT_MONO = 'ui-monospace, "JetBrains Mono", "Geist Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace';
+    const FONT_UI = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
     function formatDateISO(date) {
         const d = new Date(date);
@@ -57,16 +60,16 @@
                 return {
                     ...m,
                     Symbol: def.Symbol,
+                    Assay: def.Assay,
                     Color: def.Color,
-                    BgLight: def.BgLight,
-                    Border: def.Border
+                    BgSubtle: def.BgSubtle
                 };
             });
 
             memoryCache.set(cacheKey, enriched);
             return enriched;
         } catch (err) {
-            console.warn('Не удалось загрузить металлы с API, используем справочник по умолчанию:', err);
+            console.warn('Используем встроенный реестр металлов:', err);
             return METALS_DEF;
         }
     }
@@ -96,7 +99,6 @@
             console.warn('Не удалось загрузить цены через /v2/bankingots/prices:', err);
         }
 
-        // Запасной вариант: запросить последние 7 дней через /bankingots/prices
         const past = new Date();
         past.setDate(past.getDate() - 7);
         const recent = await fetchPricesRange('all', formatDateISO(past), dateStr);
@@ -241,7 +243,7 @@
     }
 
     /* ==========================================================================
-       2. МОДУЛЬ ГРАФИКА (chart.js)
+       2. МОДУЛЬ ГРАФИКА (chart)
        ========================================================================== */
 
     let chartInstance = null;
@@ -287,18 +289,18 @@
                 });
 
                 datasets.push({
-                    label: meta.Name,
+                    label: `${meta.Name} (${meta.Symbol})`,
                     data: points,
                     borderColor: meta.Color,
-                    backgroundColor: 'transparent', // Без градиентов
-                    borderWidth: 2,
-                    pointRadius: showPoints ? 3 : 0,
-                    pointHoverRadius: 5,
+                    backgroundColor: 'transparent',
+                    borderWidth: 1.75,
+                    pointRadius: showPoints ? 2.5 : 0,
+                    pointHoverRadius: 4.5,
                     pointBackgroundColor: meta.Color,
                     pointBorderColor: '#ffffff',
                     pointBorderWidth: 1.5,
                     spanGaps: true,
-                    tension: 0.15,
+                    tension: 0.1,
                     metalId: meta.Id
                 });
             });
@@ -314,22 +316,22 @@
             });
 
             datasets.push({
-                label: `${meta.Name} (${meta.Symbol})`,
+                label: `${meta.Name} (${meta.Assay})`,
                 data: points,
                 borderColor: meta.Color,
-                backgroundColor: meta.BgLight, // Сплошной плоский цвет (без градиентов!)
+                backgroundColor: meta.BgSubtle,
                 fill: {
                     target: 'origin',
-                    above: meta.BgLight
+                    above: meta.BgSubtle
                 },
-                borderWidth: 2.2,
-                pointRadius: showPoints || points.length < 35 ? 3 : 0,
-                pointHoverRadius: 6,
+                borderWidth: 2,
+                pointRadius: showPoints || points.length < 35 ? 2.5 : 0,
+                pointHoverRadius: 5,
                 pointBackgroundColor: meta.Color,
                 pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
+                pointBorderWidth: 1.5,
                 spanGaps: true,
-                tension: 0.12,
+                tension: 0.1,
                 metalId: meta.Id
             });
         }
@@ -352,7 +354,7 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: {
-                    duration: sortedDates.length > 300 ? 300 : 500,
+                    duration: sortedDates.length > 300 ? 250 : 400,
                     easing: 'easeOutQuart'
                 },
                 interaction: {
@@ -361,10 +363,10 @@
                 },
                 layout: {
                     padding: {
-                        top: 16,
-                        bottom: 12,
-                        left: 8,
-                        right: 16
+                        top: 14,
+                        bottom: 8,
+                        left: 4,
+                        right: 14
                     }
                 },
                 plugins: {
@@ -373,40 +375,40 @@
                         position: 'top',
                         align: 'end',
                         labels: {
-                            boxWidth: 12,
-                            boxHeight: 12,
-                            borderRadius: 3,
+                            boxWidth: 8,
+                            boxHeight: 8,
+                            borderRadius: 2,
                             useBorderRadius: true,
                             font: {
-                                family: 'system-ui, -apple-system, sans-serif',
-                                size: 12,
+                                family: FONT_MONO,
+                                size: 11,
                                 weight: '500'
                             },
-                            color: '#334155',
-                            padding: 16
+                            color: '#4b5563',
+                            padding: 14
                         }
                     },
                     tooltip: {
                         enabled: true,
                         backgroundColor: '#ffffff',
-                        titleColor: '#0f172a',
-                        bodyColor: '#334155',
-                        borderColor: '#cbd5e1',
+                        titleColor: '#111827',
+                        bodyColor: '#374151',
+                        borderColor: '#e5e7eb',
                         borderWidth: 1,
-                        cornerRadius: 8,
-                        padding: 12,
-                        boxPadding: 6,
+                        cornerRadius: 6,
+                        padding: 10,
+                        boxPadding: 4,
                         usePointStyle: true,
-                        caretSize: 6,
-                        caretPadding: 8,
+                        caretSize: 5,
+                        caretPadding: 6,
                         titleFont: {
-                            family: 'system-ui, -apple-system, sans-serif',
-                            size: 13,
+                            family: FONT_MONO,
+                            size: 12,
                             weight: '600'
                         },
                         bodyFont: {
-                            family: 'system-ui, -apple-system, sans-serif',
-                            size: 12,
+                            family: FONT_MONO,
+                            size: 11,
                             weight: '400'
                         },
                         callbacks: {
@@ -422,7 +424,7 @@
                                     const sign = val > 0 ? '+' : '';
                                     return ` ${dataset.label}: ${sign}${val.toFixed(2)}%`;
                                 }
-                                return ` ${dataset.label}: ${val.toFixed(2)} BYN / г`;
+                                return ` ${dataset.label}: ${val.toFixed(2)} BYN/г`;
                             }
                         }
                     }
@@ -431,46 +433,46 @@
                     x: {
                         grid: {
                             display: true,
-                            color: '#f1f5f9',
+                            color: 'rgba(17, 24, 39, 0.04)',
                             lineWidth: 1,
                             drawBorder: false
                         },
                         border: {
                             display: true,
-                            color: '#e2e8f0',
+                            color: '#e5e7eb',
                             width: 1
                         },
                         ticks: {
-                            color: '#64748b',
+                            color: '#6b7280',
                             font: {
-                                family: 'system-ui, -apple-system, sans-serif',
+                                family: FONT_MONO,
                                 size: 11
                             },
                             maxRotation: 0,
                             autoSkip: true,
-                            maxTicksLimit: 9,
-                            padding: 8
+                            maxTicksLimit: 8,
+                            padding: 6
                         }
                     },
                     y: {
                         grid: {
                             display: true,
-                            color: '#f1f5f9',
+                            color: 'rgba(17, 24, 39, 0.04)',
                             lineWidth: 1,
                             drawBorder: false
                         },
                         border: {
                             display: true,
-                            color: '#e2e8f0',
+                            color: '#e5e7eb',
                             width: 1
                         },
                         ticks: {
-                            color: '#64748b',
+                            color: '#6b7280',
                             font: {
-                                family: 'system-ui, -apple-system, sans-serif',
+                                family: FONT_MONO,
                                 size: 11
                             },
-                            padding: 10,
+                            padding: 8,
                             callback: (value) => {
                                 if (normalizePercent) {
                                     return `${value > 0 ? '+' : ''}${value}%`;
@@ -491,8 +493,8 @@
         if (!ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.save();
-        ctx.fillStyle = '#64748b';
-        ctx.font = '14px system-ui, -apple-system, sans-serif';
+        ctx.fillStyle = '#6b7280';
+        ctx.font = `13px ${FONT_UI}`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('Нет данных для отображения за выбранный период', canvas.width / 2, canvas.height / 2);
@@ -511,12 +513,12 @@
     }
 
     /* ==========================================================================
-       3. ГЛАВНОЕ ПРИЛОЖЕНИЕ (app.js)
+       3. ПРИЛОЖЕНИЕ (app)
        ========================================================================== */
 
     const state = {
-        selectedMetalId: '0', // Золото по умолчанию
-        selectedPeriod: '1Y', // 1 год
+        selectedMetalId: '0',
+        selectedPeriod: '1Y',
         startDate: '',
         endDate: '',
         latestPrices: new Map(),
@@ -540,7 +542,7 @@
 
         dom.metalCardsContainer = document.getElementById('metalCardsContainer');
 
-        dom.periodPills = document.querySelectorAll('.period-pill');
+        dom.periodPills = document.querySelectorAll('.segment-btn[data-period]');
         dom.customDateContainer = document.getElementById('customDateContainer');
         dom.dateStartInput = document.getElementById('dateStartInput');
         dom.dateEndInput = document.getElementById('dateEndInput');
@@ -593,7 +595,7 @@
             }
 
             renderMetalCards();
-            setOnlineStatus(true, 'Онлайн: api.nbrb.by');
+            setOnlineStatus(true, 'api.nbrb.by: онлайн');
         } catch (e) {
             console.error('Ошибка первичной загрузки:', e);
             setOnlineStatus(false, 'Автономный режим');
@@ -610,7 +612,7 @@
         }
     }
 
-    function setLoadingStatus(message = 'Загрузка котировок...') {
+    function setLoadingStatus(message = 'Загрузка архива котировок...') {
         if (dom.loadingMessage) dom.loadingMessage.textContent = message;
         if (dom.chartLoadingOverlay) dom.chartLoadingOverlay.classList.add('visible');
         state.isLoading = true;
@@ -631,19 +633,19 @@
         allCard.dataset.metalId = 'all';
         allCard.innerHTML = `
             <div class="metal-card-header">
-                <span class="metal-badge badge-all">Все 4</span>
+                <span class="metal-mark-badge">ALL</span>
                 <span class="metal-name">Все металлы</span>
             </div>
             <div class="metal-price-row">
-                <span class="metal-price" style="font-size: 15px;">Сравнение</span>
+                <span class="metal-price" style="font-size: 15px; font-weight: 500;">Сводный обзор</span>
                 <span class="metal-unit">Au, Ag, Pt, Pd</span>
             </div>
-            <div class="metal-delta delta-neutral">Мульти-график</div>
+            <div class="metal-delta-tag delta-neutral">Мульти-график</div>
         `;
         allCard.addEventListener('click', () => selectMetal('all'));
         dom.metalCardsContainer.appendChild(allCard);
 
-        // Карточки металлов
+        // Карточки отдельных металлов
         state.metals.forEach(metal => {
             const latest = state.latestPrices.get(metal.Id);
             const priceText = latest ? `${latest.Value.toFixed(2)} BYN` : '—';
@@ -658,14 +660,14 @@
 
             card.innerHTML = `
                 <div class="metal-card-header">
-                    <span class="metal-badge ${badgeClass}">${metal.Symbol}</span>
+                    <span class="metal-mark-badge ${badgeClass}">${metal.Assay || metal.Symbol}</span>
                     <span class="metal-name">${metal.Name}</span>
                 </div>
                 <div class="metal-price-row">
                     <span class="metal-price">${priceText}</span>
                     <span class="metal-unit">BYN / г</span>
                 </div>
-                <div class="metal-delta delta-neutral" id="metalCardDelta_${metal.Id}">Официальный курс</div>
+                <div class="metal-delta-tag delta-neutral" id="metalCardDelta_${metal.Id}">За 1 г слитка</div>
             `;
 
             card.addEventListener('click', () => selectMetal(String(metal.Id)));
@@ -687,7 +689,7 @@
         });
 
         if (dom.normalizeToggleWrapper) {
-            dom.normalizeToggleWrapper.style.display = metalId === 'all' ? 'flex' : 'none';
+            dom.normalizeToggleWrapper.style.display = metalId === 'all' ? 'inline-flex' : 'none';
         }
 
         await loadChartData();
@@ -734,12 +736,12 @@
     }
 
     async function loadChartData() {
-        setLoadingStatus('Загрузка котировок из НБРБ...');
+        setLoadingStatus('Загрузка архива НБРБ...');
 
         try {
             const onProgress = (loaded, total) => {
                 if (total > 1) {
-                    setLoadingStatus(`Загрузка архива: порция ${loaded} из ${total}...`);
+                    setLoadingStatus(`Загрузка архива: интервал ${loaded} из ${total}...`);
                 }
             };
 
@@ -756,7 +758,7 @@
             updateTitlesAndStats();
             updateChart();
             renderTable();
-            setOnlineStatus(true, 'Онлайн: данные актуальны');
+            setOnlineStatus(true, 'api.nbrb.by: актуально');
         } catch (err) {
             console.error('Ошибка загрузки данных котировок:', err);
             setOnlineStatus(false, 'Сбой загрузки данных');
@@ -768,29 +770,31 @@
     function updateTitlesAndStats() {
         const isAll = state.selectedMetalId === 'all';
         const metal = METALS_DEF.find(m => String(m.Id) === String(state.selectedMetalId));
-        const metalName = isAll ? 'Все металлы (сравнение)' : (metal ? `${metal.Name} (${metal.Symbol})` : 'Металл');
+        const metalTitle = isAll
+            ? 'Сравнительная динамика котировок (Au, Ag, Pt, Pd)'
+            : (metal ? `${metal.Name} (${metal.Assay || metal.Symbol}) — динамика учетной цены` : 'Динамика котировок');
 
         if (dom.chartTitle) {
-            dom.chartTitle.textContent = `Динамика курса: ${metalName}`;
+            dom.chartTitle.textContent = metalTitle;
         }
         if (dom.chartSubtitle) {
-            dom.chartSubtitle.textContent = `Период: с ${formatDateRU(state.startDate)} по ${formatDateRU(state.endDate)} • Официальные данные НБРБ`;
+            dom.chartSubtitle.textContent = `${formatDateRU(state.startDate)} — ${formatDateRU(state.endDate)} • Официальные котировки НБРБ`;
         }
 
         if (isAll) {
             const goldPrices = state.currentPrices.filter(p => p.MetalId === 0);
             const stats = calculateStats(goldPrices);
-            renderStatsValues(stats, 'Золото (эталон)');
+            renderStatsValues(stats, 'Золото');
         } else {
             const stats = calculateStats(state.currentPrices);
-            renderStatsValues(stats, metalName);
+            renderStatsValues(stats, metal ? metal.Name : '');
 
             if (stats && metal) {
                 const cardDelta = document.getElementById(`metalCardDelta_${metal.Id}`);
                 if (cardDelta) {
                     const sign = stats.changeAbs > 0 ? '+' : '';
                     const cssClass = stats.changeAbs > 0 ? 'delta-up' : (stats.changeAbs < 0 ? 'delta-down' : 'delta-neutral');
-                    cardDelta.className = `metal-delta ${cssClass}`;
+                    cardDelta.className = `metal-delta-tag ${cssClass}`;
                     cardDelta.textContent = `${sign}${stats.changePercent.toFixed(1)}% (${sign}${stats.changeAbs.toFixed(2)} BYN)`;
                 }
             }
@@ -812,31 +816,31 @@
             dom.statCurrentPrice.textContent = `${stats.currentPrice.toFixed(2)} BYN`;
         }
         if (dom.statCurrentDate) {
-            dom.statCurrentDate.textContent = formatDateRU(stats.lastDate);
+            dom.statCurrentDate.textContent = `на ${formatDateRU(stats.lastDate)}`;
         }
 
         if (dom.statDelta) {
             const sign = stats.changeAbs > 0 ? '+' : '';
             dom.statDelta.textContent = `${sign}${stats.changeAbs.toFixed(2)} BYN`;
-            dom.statDelta.style.color = stats.changeAbs > 0 ? 'var(--success)' : (stats.changeAbs < 0 ? 'var(--danger)' : 'var(--text-primary)');
+            dom.statDelta.style.color = stats.changeAbs > 0 ? 'var(--delta-pos)' : (stats.changeAbs < 0 ? 'var(--delta-neg)' : 'var(--text-primary)');
         }
         if (dom.statDeltaSub) {
             const sign = stats.changePercent > 0 ? '+' : '';
-            dom.statDeltaSub.textContent = `${sign}${stats.changePercent.toFixed(2)}% за период`;
+            dom.statDeltaSub.textContent = `${sign}${stats.changePercent.toFixed(2)}% к началу периода`;
         }
 
         if (dom.statMaxPrice) {
             dom.statMaxPrice.textContent = `${stats.maxPrice.toFixed(2)} BYN`;
         }
         if (dom.statMaxDate) {
-            dom.statMaxDate.textContent = formatDateRU(stats.maxDate);
+            dom.statMaxDate.textContent = `пик ${formatDateRU(stats.maxDate)}`;
         }
 
         if (dom.statMinPrice) {
             dom.statMinPrice.textContent = `${stats.minPrice.toFixed(2)} BYN`;
         }
         if (dom.statMinDate) {
-            dom.statMinDate.textContent = formatDateRU(stats.minDate);
+            dom.statMinDate.textContent = `минимум ${formatDateRU(stats.minDate)}`;
         }
 
         if (dom.statAvgPrice) {
@@ -868,7 +872,7 @@
         }
 
         if (dom.tableCountBadge) {
-            dom.tableCountBadge.textContent = `${filtered.length} записей`;
+            dom.tableCountBadge.textContent = `${filtered.length}`;
         }
 
         const totalPages = Math.ceil(filtered.length / state.tablePageSize) || 1;
@@ -891,17 +895,22 @@
                     const diff = item.Value - prevItem.Value;
                     const pct = prevItem.Value !== 0 ? (diff / prevItem.Value) * 100 : 0;
                     const sign = diff > 0 ? '+' : '';
-                    const color = diff > 0 ? 'var(--success)' : (diff < 0 ? 'var(--danger)' : 'var(--text-secondary)');
-                    deltaHtml = `<span style="color: ${color}; font-weight: 500;">${sign}${diff.toFixed(2)} BYN (${sign}${pct.toFixed(2)}%)</span>`;
+                    const color = diff > 0 ? 'var(--delta-pos)' : (diff < 0 ? 'var(--delta-neg)' : 'var(--text-secondary)');
+                    deltaHtml = `<span style="color: ${color}; font-weight: 500;" class="mono">${sign}${diff.toFixed(2)} BYN (${sign}${pct.toFixed(2)}%)</span>`;
                 }
 
+                let badgeClass = 'badge-gold';
+                if (metal.Id === 1) badgeClass = 'badge-silver';
+                if (metal.Id === 2) badgeClass = 'badge-platinum';
+                if (metal.Id === 3) badgeClass = 'badge-palladium';
+
                 tr.innerHTML = `
-                    <td style="font-weight: 500;">${formatDateRU(item.Date)}</td>
+                    <td class="mono">${formatDateRU(item.Date)}</td>
                     <td>
-                        <span class="metal-badge badge-${metal.Symbol.toLowerCase()}">${metal.Symbol}</span>
+                        <span class="metal-mark-badge ${badgeClass}">${metal.Assay || metal.Symbol}</span>
                         <span style="margin-left: 6px;">${metal.Name}</span>
                     </td>
-                    <td style="font-weight: 600;">${item.Value.toFixed(2)} BYN</td>
+                    <td class="mono" style="font-weight: 600;">${item.Value.toFixed(2)} BYN</td>
                     <td>${deltaHtml}</td>
                 `;
                 dom.tableBody.appendChild(tr);
@@ -909,7 +918,7 @@
         }
 
         if (dom.pageIndicator) {
-            dom.pageIndicator.textContent = `Стр. ${state.tablePage} из ${totalPages}`;
+            dom.pageIndicator.textContent = `${state.tablePage} / ${totalPages}`;
         }
         if (dom.prevPageBtn) dom.prevPageBtn.disabled = state.tablePage <= 1;
         if (dom.nextPageBtn) dom.nextPageBtn.disabled = state.tablePage >= totalPages;
@@ -921,12 +930,12 @@
             return;
         }
 
-        let csv = '\uFEFFДата;Код металла;Металл;Символ;Цена (BYN/грамм)\n';
+        let csv = '\uFEFFДата;Код металла;Металл;Проба;Цена (BYN/грамм)\n';
 
         state.currentPrices.forEach(item => {
             const metal = METALS_DEF.find(m => m.Id === item.MetalId) || METALS_DEF[0];
             const dateStr = item.Date.slice(0, 10);
-            csv += `${dateStr};${item.MetalId};"${metal.Name}";${metal.Symbol};${item.Value.toFixed(2).replace('.', ',')}\n`;
+            csv += `${dateStr};${item.MetalId};"${metal.Name}";${metal.Assay || metal.Symbol};${item.Value.toFixed(2).replace('.', ',')}\n`;
         });
 
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });

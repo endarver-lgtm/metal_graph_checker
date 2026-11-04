@@ -1,11 +1,18 @@
 /**
  * Модуль визуализации графиков котировок с использованием Chart.js
- * Стилизация: Минимализм, светлая тема, скругленные углы, СТРОГО БЕЗ ТЕНЕЙ И БЕЗ ГРАДИЕНТОВ.
+ * Стилизация по правилам unslop:
+ *  - Моноширинные метки шкал и значений (JetBrains Mono / monospace)
+ *  - Тонкие нейтральные разделители hairlines (rgba(17, 24, 39, 0.05))
+ *  - Чистый плоский тултип без теней с вложенным скруглением (6px)
+ *  - СТРОГО БЕЗ ТЕНЕЙ И БЕЗ ГРАДИЕНТОВ
  */
 
 import { METALS_DEF, formatDateRU } from './api.js';
 
 let chartInstance = null;
+
+const FONT_MONO = 'ui-monospace, "JetBrains Mono", "Geist Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace';
+const FONT_UI = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
 /**
  * Инициализация или обновление графика
@@ -18,7 +25,6 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
     if (!canvas) return null;
     const { showPoints = false, normalizePercent = false } = options;
 
-    // Уничтожаем старый график, если существует
     if (chartInstance) {
         chartInstance.destroy();
         chartInstance = null;
@@ -29,16 +35,13 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
         return null;
     }
 
-    // Собираем уникальные даты (отсортированные)
     const dateSet = new Set();
     rawData.forEach(item => dateSet.add(item.Date.slice(0, 10)));
     const sortedDates = Array.from(dateSet).sort();
 
-    // Формируем датасеты
     const datasets = [];
 
     if (selectedMetalId === 'all') {
-        // Режим всех 4 металлов
         METALS_DEF.forEach(meta => {
             const metalData = rawData.filter(d => d.MetalId === meta.Id);
             if (metalData.length === 0) return;
@@ -46,7 +49,6 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
             const priceMap = new Map();
             metalData.forEach(d => priceMap.set(d.Date.slice(0, 10), d.Value));
 
-            // Базовая цена для нормализации (%)
             const firstAvailablePrice = metalData[0]?.Value || 1;
 
             const points = sortedDates.map(dateKey => {
@@ -60,23 +62,22 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
             });
 
             datasets.push({
-                label: meta.Name,
+                label: `${meta.Name} (${meta.Symbol})`,
                 data: points,
                 borderColor: meta.Color,
-                backgroundColor: 'transparent', // Без градиентов и без заливки
-                borderWidth: 2,
-                pointRadius: showPoints ? 3 : 0,
-                pointHoverRadius: 5,
+                backgroundColor: 'transparent',
+                borderWidth: 1.75,
+                pointRadius: showPoints ? 2.5 : 0,
+                pointHoverRadius: 4.5,
                 pointBackgroundColor: meta.Color,
                 pointBorderColor: '#ffffff',
                 pointBorderWidth: 1.5,
                 spanGaps: true,
-                tension: 0.15,
+                tension: 0.1,
                 metalId: meta.Id
             });
         });
     } else {
-        // Режим одного металла
         const meta = METALS_DEF.find(m => m.Id === Number(selectedMetalId)) || METALS_DEF[0];
         const metalData = rawData.filter(d => d.MetalId === meta.Id);
         const priceMap = new Map();
@@ -88,29 +89,28 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
         });
 
         datasets.push({
-            label: `${meta.Name} (${meta.Symbol})`,
+            label: `${meta.Name} (${meta.Assay})`,
             data: points,
             borderColor: meta.Color,
-            backgroundColor: meta.BgLight, // Сплошной плоский цвет (без градиентов!)
+            backgroundColor: meta.BgSubtle,
             fill: {
                 target: 'origin',
-                above: meta.BgLight
+                above: meta.BgSubtle
             },
-            borderWidth: 2.2,
-            pointRadius: showPoints || points.length < 35 ? 3 : 0,
-            pointHoverRadius: 6,
+            borderWidth: 2,
+            pointRadius: showPoints || points.length < 35 ? 2.5 : 0,
+            pointHoverRadius: 5,
             pointBackgroundColor: meta.Color,
             pointBorderColor: '#ffffff',
-            pointBorderWidth: 2,
+            pointBorderWidth: 1.5,
             spanGaps: true,
-            tension: 0.12,
+            tension: 0.1,
             metalId: meta.Id
         });
     }
 
     const labels = sortedDates.map(dStr => formatDateRU(dStr));
 
-    // Создаем экземпляр Chart.js
     const ChartConstructor = window.Chart;
     if (!ChartConstructor) {
         console.error('Библиотека Chart.js не обнаружена!');
@@ -127,7 +127,7 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
             responsive: true,
             maintainAspectRatio: false,
             animation: {
-                duration: sortedDates.length > 300 ? 300 : 500,
+                duration: sortedDates.length > 300 ? 250 : 400,
                 easing: 'easeOutQuart'
             },
             interaction: {
@@ -136,10 +136,10 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
             },
             layout: {
                 padding: {
-                    top: 16,
-                    bottom: 12,
-                    left: 8,
-                    right: 16
+                    top: 14,
+                    bottom: 8,
+                    left: 4,
+                    right: 14
                 }
             },
             plugins: {
@@ -148,41 +148,40 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
                     position: 'top',
                     align: 'end',
                     labels: {
-                        boxWidth: 12,
-                        boxHeight: 12,
-                        borderRadius: 3,
+                        boxWidth: 8,
+                        boxHeight: 8,
+                        borderRadius: 2,
                         useBorderRadius: true,
                         font: {
-                            family: 'system-ui, -apple-system, sans-serif',
-                            size: 12,
+                            family: FONT_MONO,
+                            size: 11,
                             weight: '500'
                         },
-                        color: '#334155',
-                        padding: 16
+                        color: '#4b5563',
+                        padding: 14
                     }
                 },
                 tooltip: {
                     enabled: true,
                     backgroundColor: '#ffffff',
-                    titleColor: '#0f172a',
-                    bodyColor: '#334155',
-                    borderColor: '#cbd5e1',
+                    titleColor: '#111827',
+                    bodyColor: '#374151',
+                    borderColor: '#e5e7eb',
                     borderWidth: 1,
-                    cornerRadius: 8, // Rounded border radius
-                    padding: 12,
-                    boxPadding: 6,
+                    cornerRadius: 6,
+                    padding: 10,
+                    boxPadding: 4,
                     usePointStyle: true,
-                    // Строго без теней!
-                    caretSize: 6,
-                    caretPadding: 8,
+                    caretSize: 5,
+                    caretPadding: 6,
                     titleFont: {
-                        family: 'system-ui, -apple-system, sans-serif',
-                        size: 13,
+                        family: FONT_MONO,
+                        size: 12,
                         weight: '600'
                     },
                     bodyFont: {
-                        family: 'system-ui, -apple-system, sans-serif',
-                        size: 12,
+                        family: FONT_MONO,
+                        size: 11,
                         weight: '400'
                     },
                     callbacks: {
@@ -198,7 +197,7 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
                                 const sign = val > 0 ? '+' : '';
                                 return ` ${dataset.label}: ${sign}${val.toFixed(2)}%`;
                             }
-                            return ` ${dataset.label}: ${val.toFixed(2)} BYN / г`;
+                            return ` ${dataset.label}: ${val.toFixed(2)} BYN/г`;
                         }
                     }
                 }
@@ -207,46 +206,46 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
                 x: {
                     grid: {
                         display: true,
-                        color: '#f1f5f9',
+                        color: 'rgba(17, 24, 39, 0.04)',
                         lineWidth: 1,
                         drawBorder: false
                     },
                     border: {
                         display: true,
-                        color: '#e2e8f0',
+                        color: '#e5e7eb',
                         width: 1
                     },
                     ticks: {
-                        color: '#64748b',
+                        color: '#6b7280',
                         font: {
-                            family: 'system-ui, -apple-system, sans-serif',
+                            family: FONT_MONO,
                             size: 11
                         },
                         maxRotation: 0,
                         autoSkip: true,
-                        maxTicksLimit: 9,
-                        padding: 8
+                        maxTicksLimit: 8,
+                        padding: 6
                     }
                 },
                 y: {
                     grid: {
                         display: true,
-                        color: '#f1f5f9',
+                        color: 'rgba(17, 24, 39, 0.04)',
                         lineWidth: 1,
                         drawBorder: false
                     },
                     border: {
                         display: true,
-                        color: '#e2e8f0',
+                        color: '#e5e7eb',
                         width: 1
                     },
                     ticks: {
-                        color: '#64748b',
+                        color: '#6b7280',
                         font: {
-                            family: 'system-ui, -apple-system, sans-serif',
+                            family: FONT_MONO,
                             size: 11
                         },
-                        padding: 10,
+                        padding: 8,
                         callback: (value) => {
                             if (normalizePercent) {
                                 return `${value > 0 ? '+' : ''}${value}%`;
@@ -262,25 +261,19 @@ export function renderMetalChart(canvas, rawData, selectedMetalId, options = {})
     return chartInstance;
 }
 
-/**
- * Отрисовка пустого состояния при отсутствии данных
- */
 function drawEmptyState(canvas) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
-    ctx.fillStyle = '#64748b';
-    ctx.font = '14px system-ui, -apple-system, sans-serif';
+    ctx.fillStyle = '#6b7280';
+    ctx.font = `13px ${FONT_UI}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('Нет данных для отображения за выбранный период', canvas.width / 2, canvas.height / 2);
     ctx.restore();
 }
 
-/**
- * Экспорт графика в виде чистого PNG файла
- */
 export function exportChartAsPNG(filename = 'nbrb-metal-chart.png') {
     if (!chartInstance) return;
     const url = chartInstance.toBase64Image('image/png', 1.0);

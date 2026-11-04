@@ -4,15 +4,13 @@
  */
 
 export const METALS_DEF = [
-    { Id: 0, Symbol: 'Au', Name: 'Золото', NameEng: 'Gold', NameBel: 'Золата', Color: '#b45309', BgLight: '#fef3c7', Border: '#f59e0b' },
-    { Id: 1, Symbol: 'Ag', Name: 'Серебро', NameEng: 'Silver', NameBel: 'Серабро', Color: '#475569', BgLight: '#f1f5f9', Border: '#94a3b8' },
-    { Id: 2, Symbol: 'Pt', Name: 'Платина', NameEng: 'Platinum', NameBel: 'Плаціна', Color: '#2563eb', BgLight: '#eff6ff', Border: '#60a5fa' },
-    { Id: 3, Symbol: 'Pd', Name: 'Палладий', NameEng: 'Palladium', NameBel: 'Паладый', Color: '#0f766e', BgLight: '#ccfbf1', Border: '#2dd4bf' }
+    { Id: 0, Symbol: 'Au', Assay: 'Au 999.9', Name: 'Золото', NameEng: 'Gold', NameBel: 'Золата', Color: '#b45309', BgSubtle: 'rgba(180, 83, 9, 0.04)' },
+    { Id: 1, Symbol: 'Ag', Assay: 'Ag 999.0', Name: 'Серебро', NameEng: 'Silver', NameBel: 'Серабро', Color: '#475569', BgSubtle: 'rgba(71, 85, 105, 0.04)' },
+    { Id: 2, Symbol: 'Pt', Assay: 'Pt 999.5', Name: 'Платина', NameEng: 'Platinum', NameBel: 'Плаціна', Color: '#2563eb', BgSubtle: 'rgba(37, 99, 235, 0.04)' },
+    { Id: 3, Symbol: 'Pd', Assay: 'Pd 999.8', Name: 'Палладий', NameEng: 'Palladium', NameBel: 'Паладый', Color: '#0d9488', BgSubtle: 'rgba(13, 148, 136, 0.04)' }
 ];
 
 const API_BASE = 'https://api.nbrb.by';
-
-// Кэш в памяти для избежания повторных одинаковых запросов
 const memoryCache = new Map();
 
 /**
@@ -40,19 +38,6 @@ export function formatDateRU(date) {
 }
 
 /**
- * Длинный читаемый формат даты (напр., "2 ноября 2026")
- */
-export function formatDateFullRU(date) {
-    if (!date) return '—';
-    const d = new Date(date);
-    return d.toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    });
-}
-
-/**
  * Получение перечня металлов
  * https://api.nbrb.by/metals
  */
@@ -68,31 +53,30 @@ export async function fetchMetalsList() {
             headers: { 'Accept': 'application/json' }
         });
 
-        if (!res.ok) throw new Error(`Ошибка загрузки металлов: HTTP ${res.status}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const metals = await res.json();
 
-        // Обогащаем металлы визуальными атрибутами (цвета, символы)
         const enriched = metals.map(m => {
             const def = METALS_DEF.find(d => d.Id === m.Id) || METALS_DEF[0];
             return {
                 ...m,
                 Symbol: def.Symbol,
+                Assay: def.Assay,
                 Color: def.Color,
-                BgLight: def.BgLight,
-                Border: def.Border
+                BgSubtle: def.BgSubtle
             };
         });
 
         memoryCache.set(cacheKey, enriched);
         return enriched;
     } catch (err) {
-        console.warn('Не удалось загрузить металлы с API, используем справочник по умолчанию:', err);
+        console.warn('Используем встроенный реестр металлов:', err);
         return METALS_DEF;
     }
 }
 
 /**
- * Получение актуальных котировок на конкретную дату (или последнюю доступную)
+ * Получение актуальных котировок на конкретную дату
  * https://api.nbrb.by/v2/bankingots/prices
  */
 export async function fetchLatestPrices() {
@@ -109,22 +93,21 @@ export async function fetchLatestPrices() {
             headers: { 'Accept': 'application/json' }
         });
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-            memoryCache.set(cacheKey, data);
-            return data;
+        if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+                memoryCache.set(cacheKey, data);
+                return data;
+            }
         }
     } catch (err) {
         console.warn('Не удалось загрузить цены через /v2/bankingots/prices:', err);
     }
 
-    // Запасной вариант: запросить последние 7 дней через /bankingots/prices
     const past = new Date();
     past.setDate(past.getDate() - 7);
     const recent = await fetchPricesRange('all', formatDateISO(past), dateStr);
     
-    // Находим самые свежие записи для каждого металла
     const latestMap = new Map();
     for (const item of recent) {
         const existing = latestMap.get(item.MetalId);
@@ -170,11 +153,7 @@ export function splitDateRange(startDateStr, endDateStr, maxChunkDays = 360) {
 }
 
 /**
- * Запрос цен за период (с автоматической разбивкой на части при > 365 дней)
- * @param {number|'all'} metalId - Id металла (0 - Золото, 1 - Серебро, 2 - Платина, 3 - Палладий) или 'all'
- * @param {string} startDateStr - YYYY-MM-DD
- * @param {string} endDateStr - YYYY-MM-DD
- * @param {function} onProgress - колбэк прогресса загрузки (loaded, total)
+ * Запрос цен за период (с прозрачным чанкингом при > 365 дней)
  */
 export async function fetchPricesRange(metalId, startDateStr, endDateStr, onProgress = null) {
     const chunks = splitDateRange(startDateStr, endDateStr);
@@ -193,14 +172,12 @@ export async function fetchPricesRange(metalId, startDateStr, endDateStr, onProg
         try {
             const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
             if (!res.ok) {
-                console.error(`Ошибка при запросе части ${chunk.start}..${chunk.end}: HTTP ${res.status}`);
+                console.error(`Ошибка при запросе ${chunk.start}..${chunk.end}: HTTP ${res.status}`);
                 return [];
             }
             const data = await res.json();
             completed++;
-            if (onProgress) {
-                onProgress(completed, chunks.length);
-            }
+            if (onProgress) onProgress(completed, chunks.length);
             return Array.isArray(data) ? data : [];
         } catch (e) {
             console.error(`Сетевой сбой при загрузке ${chunk.start}..${chunk.end}:`, e);
@@ -210,7 +187,6 @@ export async function fetchPricesRange(metalId, startDateStr, endDateStr, onProg
         }
     };
 
-    // Выполняем запросы пачками (до 3 параллельных для бережного отношения к серверу НБРБ)
     const results = [];
     const batchSize = 3;
     for (let i = 0; i < chunks.length; i += batchSize) {
@@ -221,10 +197,8 @@ export async function fetchPricesRange(metalId, startDateStr, endDateStr, onProg
         }
     }
 
-    // Дедупликация и хронологическая сортировка
     const uniqueMap = new Map();
     for (const item of results) {
-        // Уникальный ключ: MetalId + Дата
         const key = `${item.MetalId}_${item.Date.slice(0, 10)}`;
         if (!uniqueMap.has(key)) {
             uniqueMap.set(key, item);
@@ -243,7 +217,7 @@ export async function fetchPricesRange(metalId, startDateStr, endDateStr, onProg
 }
 
 /**
- * Расчет аналитических показателей за период
+ * Расчет аналитических показателей периода
  */
 export function calculateStats(priceRecords) {
     if (!priceRecords || priceRecords.length === 0) {
